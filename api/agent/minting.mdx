@@ -232,6 +232,7 @@ Returns per-epoch emission details and total claimable REPPO for the specified p
 |---|---|
 | `400` | Invalid `podId` |
 | `401` | Missing or expired session token |
+| `404` | Pod not found — no pod with this token ID exists on-chain |
 
 ### Example
 
@@ -295,6 +296,7 @@ Executes on-chain claim transactions for each unclaimed epoch. Claims up to **50
 |---|---|
 | `400` | Invalid `podId` or no claimable epochs found |
 | `401` | Missing or expired session token |
+| `404` | Pod not found — no pod with this token ID exists on-chain |
 
 ### Example
 

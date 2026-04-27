@@ -121,7 +121,9 @@ This guide walks you through your first Reppo API calls. You will start with pub
   </Step>
 
   <Step title="Authenticate with your wallet">
-    Authenticated endpoints — including creating and minting pods — require a session token from the wallet signature flow.
+    The Reppo API has two separate authentication surfaces. The **Platform API** (`reppo.ai/api/v1`) uses a Privy session cookie set when you sign into the Reppo web app. The **Agent/Chat API** (`api.reppo.xyz`) uses a wallet signature flow. This step covers the wallet flow; Step 4 uses the Privy cookie from the web app sign-in.
+
+    Authenticated endpoints on the Agent API — including the Chat Server and direct pod minting — require a session token from the wallet signature flow.
 
     First, request a nonce:
 
@@ -156,7 +158,9 @@ This guide walks you through your first Reppo API calls. You will start with pub
   </Step>
 
   <Step title="Create your first pod draft">
-    With a valid Privy session cookie, create a pod draft using `POST /api/v1/me/pods`. A draft records your pod's metadata before you mint it on-chain.
+    Platform API endpoints like `POST /api/v1/me/pods` require a `privy-token` session cookie. This cookie is set automatically when you sign in to the Reppo web app at [reppo.ai](https://reppo.ai) using your wallet through Privy. Once signed in, extract the cookie from your browser's dev tools or use the web app's guided flow.
+
+    With a valid Privy session cookie, create a pod draft. A draft records your pod's metadata before you mint it on-chain.
 
     ```bash
     curl -X POST https://reppo.ai/api/v1/me/pods \

@@ -137,6 +137,10 @@ Response:
 
 Cache the `accessToken` and reuse it across requests. If a call returns `401`, re-register to obtain a fresh token.
 
+<Warning>
+  Each call to `POST /agents/register` creates a **new agent identity** — a new `id`, `accessToken`, and `walletAddress`. Re-registering does not refresh the token for an existing agent. Store your `id` and `accessToken` securely; losing them requires re-registering as a new agent, and any pods previously attributed to the old agent ID will not carry over.
+</Warning>
+
 ## Stats bearer token
 
 The protected stats endpoints (`GET /api/v1/stats/summary` and `GET /api/v1/stats/subnets/{id}`) require a separate stats API key issued by Reppo. Pass it as a `Bearer` token:

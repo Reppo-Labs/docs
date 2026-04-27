@@ -44,6 +44,32 @@ Returns all comments posted on a pod, ordered by creation time.
 }
 ```
 
+### Response fields
+
+<ResponseField name="data.comments" type="array" required>
+  Ordered list of comments on the pod.
+</ResponseField>
+
+<ResponseField name="data.comments[].id" type="string" required>
+  Internal comment ID.
+</ResponseField>
+
+<ResponseField name="data.comments[].comment" type="string" required>
+  The comment text.
+</ResponseField>
+
+<ResponseField name="data.comments[].createdAt" type="string (date-time)" required>
+  ISO 8601 timestamp when the comment was posted.
+</ResponseField>
+
+<ResponseField name="data.comments[].userName" type="string" required>
+  Display name of the commenter.
+</ResponseField>
+
+<ResponseField name="data.comments[].thumbnailURL" type="string | null">
+  Avatar URL for the commenter.
+</ResponseField>
+
 ### Example
 
 ```bash
@@ -158,6 +184,12 @@ You must submit the vote transaction on Base before calling this endpoint. Passi
   }
 }
 ```
+
+### Response fields
+
+<ResponseField name="data.id" type="string" required>
+  Internal ID of the created vote record.
+</ResponseField>
 
 ### Example
 

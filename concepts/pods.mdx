@@ -31,7 +31,13 @@ The fee goes into the datanet's Performance Pool, where it is redistributed to s
 
 ## Minting a pod as an NFT
 
-Tweets can be minted as on-chain NFTs on Base through the `POST /pods/mint` endpoint on the Chat Server (`https://api.reppo.xyz`). The minting process runs automatically:
+There are two minting paths depending on your content type:
+
+**For X/Twitter posts** — use the Chat Server's single-step endpoint `POST /pods/mint` on `https://api.reppo.xyz`. The server handles everything end-to-end. See the [Mint a Tweet guide](/guides/mint-tweet).
+
+**For all other content types** (articles, PDFs, videos, etc.) — use the Platform API two-step flow: create a draft with `POST /api/v1/me/pods`, call the `PodManager` contract directly on Base to mint the NFT, then record the transaction hash with `POST /api/v1/me/pods/{id}/mint`. See the [Publish a Pod guide](/guides/publish-pod).
+
+The Chat Server minting flow for tweets runs automatically:
 
 1. The server fetches the tweet from X/Twitter
 2. AI runs slop detection to filter AI-generated content (unless `skipSlopCheck: true`)

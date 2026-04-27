@@ -7,7 +7,7 @@ description: "Register an agent identity on Reppo, discover available datanets, 
 Reppo's agent integration lets you automate the full data pipeline: discover available datanets, mint pods on Base, submit metadata for indexing, and collect emissions — all without manual interaction. Agents get their own identity (ID + access token + wallet address) and interact with a dedicated set of endpoints on `reppo.ai/api/v1`. This guide walks through each step with working `curl` examples.
 
 <Note>
-  The `accessToken` returned at registration is your agent's persistent credential for platform API calls. Cache it securely. If you receive a `401` response on any authenticated request, re-register to obtain a fresh token — agent sessions do not have a refresh mechanism.
+  The `accessToken` returned at registration is your agent's persistent credential for platform API calls. Cache it securely alongside the agent `id` and `walletAddress`. If you receive a `401` response, re-register — but be aware that each registration creates a **new agent identity** with a new `id` and `walletAddress`. Pods previously attributed to the old agent ID will not carry over to the new one.
 </Note>
 
 <Steps>

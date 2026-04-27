@@ -25,7 +25,27 @@ Returns all datanets created by the authenticated user.
 ```json
 {
   "data": {
-    "subnets": [Subnet]
+    "subnets": [
+      {
+        "id": "subnet_01hw9k2mxvfg3q4r5t6y7u8i",
+        "subnetName": "AI Research Papers",
+        "subnetDescription": "A curated datanet for AI research paper summaries.",
+        "thumbnailUrl": null,
+        "nativeTokenAddress": "0x1234567890abcdef1234567890abcdef12345678",
+        "nativeTokenSymbol": "AITKN",
+        "nativeTokenDecimals": 18,
+        "tokenId": 7,
+        "accessFeeREPPO": 5,
+        "emissionsPerEpochREPPO": 100,
+        "emissionsPerEpochPrimaryToken": 500,
+        "status": "active",
+        "upVoteVolume": 4820,
+        "downVoteVolume": 310,
+        "onboardingPublishers": "Submit concise summaries of peer-reviewed AI papers.",
+        "onboardingVoters": "Evaluate summaries for accuracy, clarity, and relevance.",
+        "createdByUserId": "user_abc123"
+      }
+    ]
   }
 }
 ```
@@ -147,7 +167,25 @@ Returns a single datanet owned by the authenticated user.
 ```json
 {
   "data": {
-    "subnet": Subnet
+    "subnet": {
+      "id": "subnet_01hw9k2mxvfg3q4r5t6y7u8i",
+      "subnetName": "AI Research Papers",
+      "subnetDescription": "A curated datanet for AI research paper summaries.",
+      "thumbnailUrl": null,
+      "nativeTokenAddress": "0x1234567890abcdef1234567890abcdef12345678",
+      "nativeTokenSymbol": "AITKN",
+      "nativeTokenDecimals": 18,
+      "tokenId": 7,
+      "accessFeeREPPO": 5,
+      "emissionsPerEpochREPPO": 100,
+      "emissionsPerEpochPrimaryToken": 500,
+      "status": "active",
+      "upVoteVolume": 4820,
+      "downVoteVolume": 310,
+      "onboardingPublishers": "Submit concise summaries of peer-reviewed AI papers.",
+      "onboardingVoters": "Evaluate summaries for accuracy, clarity, and relevance.",
+      "createdByUserId": "user_abc123"
+    }
   }
 }
 ```
@@ -431,7 +469,27 @@ Returns all active public datanets. No authentication required. Supports paginat
 ```json
 {
   "data": {
-    "subnets": [Subnet]
+    "subnets": [
+      {
+        "id": "subnet_01hw9k2mxvfg3q4r5t6y7u8i",
+        "subnetName": "AI Research Papers",
+        "subnetDescription": "A curated datanet for AI research paper summaries.",
+        "thumbnailUrl": null,
+        "nativeTokenAddress": "0x1234567890abcdef1234567890abcdef12345678",
+        "nativeTokenSymbol": "AITKN",
+        "nativeTokenDecimals": 18,
+        "tokenId": 7,
+        "accessFeeREPPO": 5,
+        "emissionsPerEpochREPPO": 100,
+        "emissionsPerEpochPrimaryToken": 500,
+        "status": "active",
+        "upVoteVolume": 4820,
+        "downVoteVolume": 310,
+        "onboardingPublishers": "Submit concise summaries of peer-reviewed AI papers.",
+        "onboardingVoters": "Evaluate summaries for accuracy, clarity, and relevance.",
+        "createdByUserId": "user_abc123"
+      }
+    ]
   }
 }
 ```
@@ -465,7 +523,25 @@ Returns a single public datanet by its internal ID. No authentication required.
 ```json
 {
   "data": {
-    "subnet": Subnet
+    "subnet": {
+      "id": "subnet_abc123",
+      "subnetName": "Base DeFi Research",
+      "subnetDescription": "A curated datanet for high-signal DeFi research on Base.",
+      "thumbnailUrl": null,
+      "nativeTokenAddress": "0x1234567890abcdef1234567890abcdef12345678",
+      "nativeTokenSymbol": "DEFI",
+      "nativeTokenDecimals": 18,
+      "tokenId": 3,
+      "accessFeeREPPO": 10,
+      "emissionsPerEpochREPPO": 100,
+      "emissionsPerEpochPrimaryToken": 500,
+      "status": "active",
+      "upVoteVolume": 8200,
+      "downVoteVolume": 410,
+      "onboardingPublishers": "Submit original DeFi analysis with verifiable on-chain references.",
+      "onboardingVoters": "Vote on quality and accuracy of DeFi research submissions.",
+      "createdByUserId": "user_abc123"
+    }
   }
 }
 ```
