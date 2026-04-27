@@ -1,0 +1,110 @@
+{
+  "projectType": "api-service",
+  "projectName": "Reppo API",
+  "projectDescription": "A REST API for the Reppo decentralized AI training data protocol — enabling agents and integrators to manage datanets, publish pods, cast votes, mint NFTs, and claim REPPO emissions on Base.",
+  "theme": "luma",
+  "primaryColor": "#ea8d3a",
+  "lightColor": null,
+  "darkColor": "#fd4926",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "authentication",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/datanets",
+              "concepts/pods",
+              "concepts/votes-curation",
+              "concepts/staking-emissions"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/create-datanet",
+              "guides/publish-pod",
+              "guides/mint-tweet",
+              "guides/claim-emissions",
+              "guides/agent-integration"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Platform API",
+            "pages": [
+              "api/overview",
+              "api/subnets",
+              "api/pods",
+              "api/engagement",
+              "api/stakes",
+              "api/locks",
+              "api/stats"
+            ]
+          },
+          {
+            "group": "Agent API",
+            "pages": [
+              "api/agent/auth",
+              "api/agent/chat",
+              "api/agent/minting",
+              "api/agent/agents",
+              "api/agent/ab-testing"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Decentralized AI training data marketplace via datanets (subnets)",
+    "Pod publishing and on-chain NFT minting on Base",
+    "Stake-assured human feedback via veREPPO voting",
+    "Epoch-based REPPO emissions for publishers and curators",
+    "AI-assisted pod minting from X/Twitter posts",
+    "Multi-turn AI chat assistant for platform guidance",
+    "Agent SDK for automated data pipeline integrations",
+    "A/B creative testing via Virtuals Ad Cluster"
+  ],
+  "publicApiSurface": [
+    "GET /api/v1/me/subnets — list authenticated user's datanets",
+    "POST /api/v1/me/subnets — create a new datanet draft",
+    "POST /api/v1/me/subnets/{id}/publish — publish a datanet on-chain",
+    "GET /api/v1/me/pods — list authenticated user's pods",
+    "POST /api/v1/me/pods — create a pod draft",
+    "POST /api/v1/me/pods/{id}/mint — mint a pod NFT",
+    "POST /api/v1/me/pods/{id}/republish — republish a pod",
+    "GET /api/v1/public/pods — list public active pods",
+    "GET /api/v1/public/pods/{podId} — get a public pod by ID",
+    "GET /api/v1/public/subnets — list public active datanets",
+    "POST /api/v1/pods/{podId}/votes — cast a vote on a pod",
+    "POST /api/v1/pods/{podId}/comments — comment on a pod",
+    "POST /api/v1/stakes/amplifi — record an Amplifi stake",
+    "GET /api/v1/locks/{address} — get staking locks for a wallet",
+    "GET /api/v1/stats — public network summary stats",
+    "POST https://api.reppo.xyz/auth/nonce — request wallet auth nonce",
+    "POST https://api.reppo.xyz/auth/verify — verify wallet signature",
+    "POST https://api.reppo.xyz/chat — send AI chat message",
+    "GET https://api.reppo.xyz/chat/{sessionId}/history — get chat history",
+    "POST https://api.reppo.xyz/pods/mint — mint a tweet as a pod NFT",
+    "GET https://api.reppo.xyz/pods/{podId}/emissions — check claimable emissions",
+    "POST https://api.reppo.xyz/pods/{podId}/emissions/claim — claim pod emissions",
+    "POST https://reppo.ai/api/v1/agents/register — register an agent",
+    "GET https://reppo.ai/api/v1/agents/subnets — list all subnets for agents",
+    "POST https://reppo.ai/api/v1/agents/{agentId}/pods — submit pod metadata",
+    "POST https://reppo.ai/api/v1/virtuals/jobs/ab-testing — create A/B creative test"
+  ]
+}

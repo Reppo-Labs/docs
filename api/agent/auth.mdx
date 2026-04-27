@@ -1,0 +1,159 @@
+---
+title: "Wallet Authentication for the Agent API"
+sidebarTitle: "Auth"
+description: "Two-step EIP-191 wallet authentication for the Reppo Agent API — request a nonce, sign it with your wallet, and receive a 24-hour session token."
+---
+
+The Agent API uses a two-step wallet authentication flow based on EIP-191 `personal_sign`. You first request a nonce tied to your wallet address, sign the returned message client-side, then submit the signature to receive a session token. Both steps use the Chat Server base URL (`https://api.reppo.xyz`) and do not require an existing token.
+
+## Step 1 — Request a nonce
+
+`POST https://api.reppo.xyz/auth/nonce`
+
+Send your wallet address to receive a unique nonce and a pre-formatted message to sign. The nonce expires after **5 minutes**.
+
+### Request body
+
+<ParamField body="walletAddress" type="string" required>
+  Your Ethereum wallet address. Must be `0x`-prefixed and 40 hex characters. Pattern: `^0x[a-fA-F0-9]{40}$`.
+</ParamField>
+
+### Response
+
+<ResponseField name="nonce" type="string">
+  A UUID identifying this auth attempt. Pass this value to `/auth/verify`.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  The exact string you must sign with your wallet using `personal_sign` (EIP-191).
+</ResponseField>
+
+### Errors
+
+| Status | Meaning |
+|---|---|
+| `400` | Missing or malformed `walletAddress` |
+| `429` | Rate limit exceeded |
+
+### Example
+
+```bash
+curl --request POST \
+  --url https://api.reppo.xyz/auth/nonce \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "walletAddress": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18"
+  }'
+```
+
+```json
+{
+  "nonce": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "message": "Sign this message to authenticate with Reppo.\n\nNonce: a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+}
+```
+
+## Step 2 — Verify the signature
+
+`POST https://api.reppo.xyz/auth/verify`
+
+Submit your wallet address, the signature produced by signing the message from step 1, and the nonce. A valid signature returns a 24-hour session token.
+
+### Request body
+
+<ParamField body="walletAddress" type="string" required>
+  The same wallet address you passed to `/auth/nonce`. Pattern: `^0x[a-fA-F0-9]{40}$`.
+</ParamField>
+
+<ParamField body="signature" type="string" required>
+  The EIP-191 `personal_sign` signature of the `message` string returned by `/auth/nonce`.
+</ParamField>
+
+<ParamField body="nonce" type="string" required>
+  The UUID returned by `/auth/nonce`. Must not be expired (5-minute window).
+</ParamField>
+
+### Response
+
+<ResponseField name="token" type="string">
+  A session token valid for 24 hours. Pass this as `Authorization: Bearer <token>` on all subsequent authenticated requests.
+</ResponseField>
+
+<ResponseField name="walletAddress" type="string">
+  The authenticated wallet address in lowercase.
+</ResponseField>
+
+### Errors
+
+| Status | Meaning |
+|---|---|
+| `400` | Missing fields or malformed request |
+| `401` | Signature does not match the wallet address, or nonce has expired |
+| `429` | Rate limit exceeded |
+
+### Example
+
+<CodeGroup>
+
+```bash ethers.js (Node.js)
+# 1. Fetch the nonce and message
+NONCE_RESP=$(curl -s --request POST \
+  --url https://api.reppo.xyz/auth/nonce \
+  --header 'Content-Type: application/json' \
+  --data '{"walletAddress": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18"}')
+
+MESSAGE=$(echo $NONCE_RESP | jq -r '.message')
+NONCE=$(echo $NONCE_RESP | jq -r '.nonce')
+
+# 2. Sign the message with ethers.js (run in Node.js)
+# const { ethers } = require("ethers");
+# const wallet = new ethers.Wallet(PRIVATE_KEY);
+# const signature = await wallet.signMessage(MESSAGE);
+
+# 3. Submit the signature
+curl --request POST \
+  --url https://api.reppo.xyz/auth/verify \
+  --header 'Content-Type: application/json' \
+  --data "{
+    \"walletAddress\": \"0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18\",
+    \"signature\": \"<signature>\",
+    \"nonce\": \"$NONCE\"
+  }"
+```
+
+```bash cast (Foundry)
+# 1. Fetch the nonce and message
+NONCE_RESP=$(curl -s --request POST \
+  --url https://api.reppo.xyz/auth/nonce \
+  --header 'Content-Type: application/json' \
+  --data '{"walletAddress": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18"}')
+
+MESSAGE=$(echo $NONCE_RESP | jq -r '.message')
+NONCE=$(echo $NONCE_RESP | jq -r '.nonce')
+
+# 2. Sign the message with cast
+SIGNATURE=$(cast wallet sign --private-key $PRIVATE_KEY "$MESSAGE")
+
+# 3. Submit the signature
+curl --request POST \
+  --url https://api.reppo.xyz/auth/verify \
+  --header 'Content-Type: application/json' \
+  --data "{
+    \"walletAddress\": \"0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18\",
+    \"signature\": \"$SIGNATURE\",
+    \"nonce\": \"$NONCE\"
+  }"
+```
+
+</CodeGroup>
+
+```json
+{
+  "token": "eyJ...",
+  "walletAddress": "0x742d35cc6634c0532925a3b844bc9e7595f2bd18"
+}
+```
+
+<Note>
+The session token expires after **24 hours**. Include it on all subsequent authenticated requests as `Authorization: Bearer <token>`. When it expires, repeat the nonce → verify flow to obtain a fresh token.
+</Note>

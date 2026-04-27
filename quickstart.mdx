@@ -1,0 +1,239 @@
+---
+title: "Get started with the Reppo API"
+sidebarTitle: "Quickstart"
+description: "Make your first Reppo API calls: fetch live network stats without auth, list public pods, authenticate with your wallet, and create a pod draft."
+---
+
+This guide walks you through your first Reppo API calls. You will start with public endpoints that need no authentication, then authenticate with your wallet and create a pod draft. All examples use `curl` — swap in your HTTP client of choice.
+
+<Note>
+  On-chain operations (minting pods, claiming emissions) require transactions on **Base** (chain ID `8453`). Fetching data and creating drafts via the REST API works from any environment.
+</Note>
+
+<Steps>
+  <Step title="Fetch public network stats">
+    The `GET /api/v1/stats` endpoint is public — no authentication required. Call it to get a live snapshot of the Reppo network.
+
+    ```bash
+    curl https://reppo.ai/api/v1/stats
+    ```
+
+    Response shape:
+
+    ```json
+    {
+      "data": {
+        "totalPods": 1482,
+        "totalActiveSubnets": 12,
+        "totalSubnetFees": 94500.0,
+        "totalSubnetFeesBurnt": 12300.0,
+        "totalSubnetFeesAccumulatedToPerformancePool": 47200.0,
+        "totalSubnetFeesLocked": 35000.0,
+        "epochLengthSeconds": 172800,
+        "governanceLocked": 520000.0,
+        "communityLocked": 310000.0,
+        "lastUpdatedAt": "2026-04-24T10:00:00Z",
+        "reppoPriceUSD": 0.043,
+        "totalReppoLocked": 830000.0,
+        "totalUsers": 3740,
+        "totalLocks": 2910,
+        "averageLockedPerUser": 222.0,
+        "activeSubnetIds": [
+          { "id": "subnet_abc" },
+          { "id": "subnet_def" }
+        ]
+      }
+    }
+    ```
+
+    Key fields to note:
+
+    <ResponseField name="data.totalPods" type="integer">
+      Total number of pods published across all datanets.
+    </ResponseField>
+
+    <ResponseField name="data.totalActiveSubnets" type="integer">
+      Number of currently active datanets.
+    </ResponseField>
+
+    <ResponseField name="data.reppoPriceUSD" type="number">
+      Current REPPO token price in USD.
+    </ResponseField>
+
+    <ResponseField name="data.epochLengthSeconds" type="integer">
+      Duration of each epoch in seconds (typically 172800, or 48 hours).
+    </ResponseField>
+
+    <ResponseField name="data.totalReppoLocked" type="number">
+      Total REPPO locked for veREPPO voting power across all participants.
+    </ResponseField>
+  </Step>
+
+  <Step title="List public pods">
+    Browse published pods without authentication using `GET /api/v1/public/pods`. Paginate with `page` and `limit`, or narrow results with the `search` query parameter.
+
+    ```bash
+    curl "https://reppo.ai/api/v1/public/pods?page=1&limit=5&search=machine+learning"
+    ```
+
+    Response shape:
+
+    ```json
+    {
+      "data": {
+        "pods": [
+          {
+            "id": "pod_xyz789",
+            "name": "Annotated ML benchmark comparison",
+            "description": "Side-by-side evaluation of five open-source ML benchmarks with human annotations.",
+            "tokenId": 204,
+            "privateSubnetId": "subnet_abc",
+            "url": "https://x.com/user/status/1234567890",
+            "imageUrl": null,
+            "thumbnailUrl": "https://cdn.reppo.ai/thumbs/pod_xyz789.jpg",
+            "videoUrl": null,
+            "pdfUrl": null,
+            "creator": {
+              "id": "user_111",
+              "username": "mlresearcher",
+              "avatarUrl": "https://cdn.reppo.ai/avatars/user_111.jpg"
+            },
+            "createdAt": "2026-04-20T14:32:00Z",
+            "updatedAt": "2026-04-22T09:10:00Z",
+            "podValidityEpoch": 31,
+            "cumulativeUpVotesVolume": 12400.0,
+            "cumulativeDownVotesVolume": 200.0
+          }
+        ]
+      }
+    }
+    ```
+
+    Supported query parameters:
+
+    | Parameter | Type | Default | Description |
+    |-----------|------|---------|-------------|
+    | `page` | integer | `1` | Page number (minimum 1) |
+    | `limit` | integer | `10` | Items per page (minimum 1) |
+    | `search` | string | — | Free-text search term |
+    | `filters[currentEpoch]` | integer | — | Filter to pods active in a specific epoch |
+    | `filters[subnet]` | string | — | Filter to pods in a specific datanet |
+  </Step>
+
+  <Step title="Authenticate with your wallet">
+    Authenticated endpoints — including creating and minting pods — require a session token from the wallet signature flow.
+
+    First, request a nonce:
+
+    ```bash
+    curl -X POST https://api.reppo.xyz/auth/nonce \
+      -H "Content-Type: application/json" \
+      -d '{"walletAddress": "0xYourWalletAddress"}'
+    ```
+
+    Sign the returned `message` with your wallet using EIP-191 `personal_sign`, then verify:
+
+    ```bash
+    curl -X POST https://api.reppo.xyz/auth/verify \
+      -H "Content-Type: application/json" \
+      -d '{
+        "walletAddress": "0xYourWalletAddress",
+        "signature": "0xYourSignature",
+        "nonce": "nonce-uuid-from-previous-step"
+      }'
+    ```
+
+    The response includes your 24-hour session token:
+
+    ```json
+    {
+      "token": "eyJhbGci...",
+      "walletAddress": "0xyourwalletaddress"
+    }
+    ```
+
+    See [Authentication](/authentication) for the complete walkthrough including how to use the `privy-token` cookie for Platform API endpoints.
+  </Step>
+
+  <Step title="Create your first pod draft">
+    With a valid Privy session cookie, create a pod draft using `POST /api/v1/me/pods`. A draft records your pod's metadata before you mint it on-chain.
+
+    ```bash
+    curl -X POST https://reppo.ai/api/v1/me/pods \
+      -H "Content-Type: application/json" \
+      -H "Cookie: privy-token=<your-privy-token>" \
+      -d '{
+        "subnetId": "subnet_abc",
+        "podName": "GPT-4 vs Llama 3 annotation comparison",
+        "url": "https://x.com/user/status/9876543210",
+        "platform": "X (Twitter)",
+        "category": "Model Evaluation",
+        "podDescription": "Human-annotated comparison of GPT-4 and Llama 3 outputs across 50 reasoning tasks.",
+        "agreeToTerms": true
+      }'
+    ```
+
+    Response:
+
+    ```json
+    {
+      "data": {
+        "id": "pod_draft_001"
+      }
+    }
+    ```
+
+    Required fields for `POST /me/pods`:
+
+    <ParamField body="subnetId" type="string" required>
+      The ID of the datanet you are publishing to. Use `GET /api/v1/public/subnets` to browse available datanets.
+    </ParamField>
+
+    <ParamField body="podName" type="string" required>
+      Display name for your pod. Between 3 and 50 characters.
+    </ParamField>
+
+    <ParamField body="url" type="string" required>
+      Source URL for the content (e.g., a tweet URL or article link). Must be a valid URI.
+    </ParamField>
+
+    <ParamField body="platform" type="string" required>
+      Platform the content originates from (e.g., `"X (Twitter)"`, `"YouTube"`). Between 2 and 50 characters.
+    </ParamField>
+
+    <ParamField body="category" type="string" required>
+      Content category within the datanet (e.g., `"Model Evaluation"`, `"RLHF"`). Between 2 and 50 characters.
+    </ParamField>
+
+    <ParamField body="podDescription" type="string" required>
+      Brief description of the content. Between 10 and 200 characters.
+    </ParamField>
+
+    <ParamField body="agreeToTerms" type="boolean" required>
+      Must be `true`. Confirms you accept the Reppo publishing terms.
+    </ParamField>
+
+    Optional fields: `imageURL`, `thumbnailURL`, `pdfURL`, `videoURL` (all valid URIs).
+
+    <Tip>
+      Save the `id` from the response — you will need it to mint the pod on-chain with `POST /me/pods/{id}/mint`.
+    </Tip>
+  </Step>
+</Steps>
+
+## What's next
+
+<CardGroup cols={2}>
+  <Card title="Mint a pod on-chain" icon="hammer" href="/guides/mint-tweet">
+    Turn your pod draft into an NFT on Base using the minting endpoint.
+  </Card>
+  <Card title="Claim emissions" icon="coins" href="/guides/claim-emissions">
+    Check and claim your accumulated REPPO rewards from the Chat Server.
+  </Card>
+  <Card title="Create a datanet" icon="network-wired" href="/guides/create-datanet">
+    Launch your own domain-specific data market with custom fees and rules.
+  </Card>
+  <Card title="Agent integration" icon="robot" href="/guides/agent-integration">
+    Automate pod discovery, submission, and emissions claims with the Agent API.
+  </Card>
+</CardGroup>

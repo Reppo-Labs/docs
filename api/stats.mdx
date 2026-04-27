@@ -1,0 +1,267 @@
+---
+title: "Network Stats API — REPPO Protocol Metrics"
+sidebarTitle: "Stats"
+description: "Query REPPO network-wide metrics and per-datanet statistics including total value locked, active pods, emissions rates, fee totals, and token price."
+---
+
+The stats endpoints expose aggregated metrics about the REPPO protocol: total value locked, active subnets, fee distributions, epoch configuration, and the current REPPO price in USD. A public version of the network summary is available without authentication; the protected versions require a stats bearer token (`REPPO_STATS_API_KEY`).
+
+---
+
+## Get network stats (public)
+
+<br />
+
+```
+GET /stats
+```
+
+Returns a snapshot of high-level REPPO network metrics. No authentication required.
+
+<Note>
+This endpoint is currently available without authentication. Use the protected `GET /stats/summary` endpoint for production integrations where you need a stable, authenticated version of these metrics.
+</Note>
+
+**Response `200`**
+
+```json
+{
+  "data": {
+    "totalPods": 1420,
+    "totalActiveSubnets": 18,
+    "totalSubnetFees": 52300.75,
+    "totalSubnetFeesBurnt": 12400.0,
+    "totalSubnetFeesAccumulatedToPerformancePool": 18000.0,
+    "totalSubnetFeesLocked": 21900.75,
+    "epochLengthSeconds": 604800,
+    "governanceLocked": 3200000.0,
+    "communityLocked": 1800000.0,
+    "lastUpdatedAt": "2025-04-24T00:00:00Z",
+    "reppoPriceUSD": 0.042,
+    "totalReppoLocked": 5000000.0,
+    "totalUsers": 8400,
+    "totalLocks": 2100,
+    "averageLockedPerUser": 595.24,
+    "activeSubnetIds": [
+      { "id": "subnet_abc123" },
+      { "id": "subnet_def456" }
+    ]
+  }
+}
+```
+
+### Response fields
+
+<ResponseField name="data.totalPods" type="integer" required>
+  Total number of pods minted across all datanets.
+</ResponseField>
+
+<ResponseField name="data.totalActiveSubnets" type="integer" required>
+  Number of currently active datanets.
+</ResponseField>
+
+<ResponseField name="data.totalSubnetFees" type="number" required>
+  Cumulative subnet fees collected across the protocol, in REPPO.
+</ResponseField>
+
+<ResponseField name="data.totalSubnetFeesBurnt" type="number" required>
+  Portion of collected subnet fees that have been burned.
+</ResponseField>
+
+<ResponseField name="data.totalSubnetFeesAccumulatedToPerformancePool" type="number" required>
+  Portion of collected fees directed to the performance reward pool.
+</ResponseField>
+
+<ResponseField name="data.totalSubnetFeesLocked" type="number" required>
+  Portion of collected fees that have been locked.
+</ResponseField>
+
+<ResponseField name="data.epochLengthSeconds" type="integer" required>
+  Duration of a single epoch in seconds.
+</ResponseField>
+
+<ResponseField name="data.governanceLocked" type="number" required>
+  Total REPPO locked by governance participants.
+</ResponseField>
+
+<ResponseField name="data.communityLocked" type="number" required>
+  Total REPPO locked by community participants.
+</ResponseField>
+
+<ResponseField name="data.lastUpdatedAt" type="string (date-time)" required>
+  ISO 8601 timestamp of the last stats update.
+</ResponseField>
+
+<ResponseField name="data.reppoPriceUSD" type="number" required>
+  Current REPPO token price in USD.
+</ResponseField>
+
+<ResponseField name="data.totalReppoLocked" type="number" required>
+  Total REPPO locked across all lock positions protocol-wide.
+</ResponseField>
+
+<ResponseField name="data.totalUsers" type="integer" required>
+  Total number of registered users on the platform.
+</ResponseField>
+
+<ResponseField name="data.totalLocks" type="integer" required>
+  Total number of active veREPPO lock positions.
+</ResponseField>
+
+<ResponseField name="data.averageLockedPerUser" type="number" required>
+  Average REPPO locked per user across all lock holders.
+</ResponseField>
+
+<ResponseField name="data.activeSubnetIds" type="array" required>
+  Array of objects, each containing an `id` string for each active datanet.
+</ResponseField>
+
+### Example
+
+```bash
+curl https://reppo.ai/api/v1/stats
+```
+
+---
+
+## Get network stats (protected)
+
+<br />
+
+```
+GET /stats/summary
+```
+
+Returns the same network summary as `GET /stats` but requires authentication. Use this endpoint in production integrations where you need a stable, auth-gated version of the metrics.
+
+**Auth:** Stats bearer token (`REPPO_STATS_API_KEY`)
+
+```bash
+curl https://reppo.ai/api/v1/stats/summary \
+  -H "Authorization: Bearer <REPPO_STATS_API_KEY>"
+```
+
+The response shape is identical to `GET /stats`.
+
+---
+
+## Get datanet stats
+
+<br />
+
+```
+GET /stats/subnets/{id}
+```
+
+Returns detailed statistics for a single datanet, including vote history, emission rates, fee collection estimates, and access counts.
+
+**Auth:** Stats bearer token (`REPPO_STATS_API_KEY`)
+
+### Path parameters
+
+<ParamField path="id" type="string" required>
+  The internal ID of the datanet.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": {
+    "id": "subnet_abc123",
+    "tokenId": 7,
+    "subnetName": "AI Research Papers",
+    "subnetDescription": "Curated summaries of peer-reviewed AI research.",
+    "cumulativeUpVotes": 48200.0,
+    "cumulativeDownVotes": 3100.0,
+    "createdAt": "2025-01-15T08:00:00Z",
+    "emissionsPerEpochREPPO": 5000.0,
+    "emissionsPerEpochPrimaryToken": 200.0,
+    "primaryTokenSymbol": "AITKN",
+    "activePodCount": 214,
+    "userAccessCount": 1830,
+    "reppoSeedsBySubnetOwnerAmount": 10000.0,
+    "publishingFeeREPPO": 10.0,
+    "estimatedTotalPublishingFeeCollectedUSD": 84.0,
+    "accessFeeREPPO": 5.0,
+    "estimatedTotalAccessFeeCollectedUSD": 384.3
+  }
+}
+```
+
+### Response fields
+
+<ResponseField name="data.id" type="string" required>
+  Internal datanet ID.
+</ResponseField>
+
+<ResponseField name="data.tokenId" type="integer" required>
+  On-chain token ID for this datanet.
+</ResponseField>
+
+<ResponseField name="data.subnetName" type="string" required>
+  Display name of the datanet.
+</ResponseField>
+
+<ResponseField name="data.subnetDescription" type="string" required>
+  Description of the datanet's focus.
+</ResponseField>
+
+<ResponseField name="data.cumulativeUpVotes" type="number" required>
+  Total weighted up-vote volume accumulated across all pods and epochs in this datanet.
+</ResponseField>
+
+<ResponseField name="data.cumulativeDownVotes" type="number" required>
+  Total weighted down-vote volume accumulated across all pods and epochs in this datanet.
+</ResponseField>
+
+<ResponseField name="data.createdAt" type="string (date-time)" required>
+  ISO 8601 timestamp of when the datanet was created.
+</ResponseField>
+
+<ResponseField name="data.emissionsPerEpochREPPO" type="number" required>
+  REPPO emitted to curators per epoch.
+</ResponseField>
+
+<ResponseField name="data.emissionsPerEpochPrimaryToken" type="number" required>
+  Primary token emitted to curators per epoch.
+</ResponseField>
+
+<ResponseField name="data.primaryTokenSymbol" type="string" required>
+  Ticker symbol of the primary token.
+</ResponseField>
+
+<ResponseField name="data.activePodCount" type="integer" required>
+  Number of currently active pods in this datanet.
+</ResponseField>
+
+<ResponseField name="data.userAccessCount" type="integer" required>
+  Total number of user access events recorded for this datanet.
+</ResponseField>
+
+<ResponseField name="data.reppoSeedsBySubnetOwnerAmount" type="number" required>
+  Amount of REPPO seeded into this datanet by its owner.
+</ResponseField>
+
+<ResponseField name="data.publishingFeeREPPO" type="number" required>
+  Current pod publishing fee in REPPO.
+</ResponseField>
+
+<ResponseField name="data.estimatedTotalPublishingFeeCollectedUSD" type="number" required>
+  Estimated cumulative USD value of all publishing fees collected, based on current REPPO price.
+</ResponseField>
+
+<ResponseField name="data.accessFeeREPPO" type="number" required>
+  Current access fee in REPPO.
+</ResponseField>
+
+<ResponseField name="data.estimatedTotalAccessFeeCollectedUSD" type="number" required>
+  Estimated cumulative USD value of all access fees collected, based on current REPPO price.
+</ResponseField>
+
+### Example
+
+```bash
+curl https://reppo.ai/api/v1/stats/subnets/subnet_abc123 \
+  -H "Authorization: Bearer <REPPO_STATS_API_KEY>"
+```

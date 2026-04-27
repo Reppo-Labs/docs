@@ -1,0 +1,318 @@
+---
+title: "Pod Minting and Emissions — Agent API"
+sidebarTitle: "Minting"
+description: "Wallet-authenticated Chat Server endpoints to mint X/Twitter posts as pod NFTs on Base, list your pods, and check and claim REPPO emissions per epoch."
+---
+
+The Agent Chat Server provides wallet-authenticated endpoints for minting X/Twitter posts as pods (NFTs) on Base and managing the REPPO emissions those pods earn. All endpoints below use the Chat Server base URL (`https://api.reppo.xyz`). Minting and emissions endpoints require the wallet session token from the [auth flow](/api/agent/auth); the health endpoint is public.
+
+<Warning>
+Pod minting runs an AI slop-detection step before minting. Posts flagged as low-quality content will be rejected with a `400` error. Use `skipSlopCheck: true` to bypass this check, but expect that pods minted without the check may not earn emissions if flagged later.
+</Warning>
+
+## Health check
+
+`GET https://api.reppo.xyz/health`
+
+Returns the server status and uptime. Use this to verify that the Chat Server is available before initiating minting operations. No authentication required.
+
+### Response
+
+<ResponseField name="status" type="string">
+  Always `"ok"` when the server is healthy.
+</ResponseField>
+
+<ResponseField name="service" type="string">
+  Service name identifier (e.g., `"chat-server"`).
+</ResponseField>
+
+<ResponseField name="started" type="string">
+  ISO 8601 datetime when the server process started.
+</ResponseField>
+
+<ResponseField name="uptime" type="number">
+  Seconds the server has been running since `started`.
+</ResponseField>
+
+### Example
+
+```bash
+curl --request GET \
+  --url https://api.reppo.xyz/health
+```
+
+```json
+{
+  "status": "ok",
+  "service": "chat-server",
+  "started": "2025-01-15T00:00:00Z",
+  "uptime": 86400
+}
+```
+
+## Mint a pod
+
+`POST https://api.reppo.xyz/pods/mint`
+
+Fetches the tweet at the provided URL, runs AI slop detection, generates metadata via AI, mints the pod on-chain on Base, and submits the metadata to the Reppo platform. Returns the transaction hash and Basescan link on success.
+
+### Request body
+
+<ParamField body="tweetUrl" type="string" required>
+  Full X/Twitter post URL to mint as a pod (e.g., `https://x.com/user/status/1234567890`).
+</ParamField>
+
+<ParamField body="subnetHint" type="string">
+  Subnet name or ID to mint the pod into. If omitted, the server selects the best-matching subnet automatically.
+</ParamField>
+
+<ParamField body="title" type="string">
+  Custom pod title. Maximum 80 characters. Auto-generated from tweet content if omitted.
+</ParamField>
+
+<ParamField body="skipSlopCheck" type="boolean" default="false">
+  Skip the AI content quality check. Defaults to `false`. See the warning above before setting this to `true`.
+</ParamField>
+
+### Response
+
+<ResponseField name="success" type="boolean">
+  `true` when the pod was minted and submitted successfully.
+</ResponseField>
+
+<ResponseField name="txHash" type="string">
+  On-chain mint transaction hash on Base.
+</ResponseField>
+
+<ResponseField name="podId" type="string">
+  On-chain token ID. May be `null` if the transaction is still being confirmed.
+</ResponseField>
+
+<ResponseField name="title" type="string">
+  The title assigned to the pod (your custom value or the auto-generated one).
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  AI-generated description of the pod content.
+</ResponseField>
+
+<ResponseField name="basescanUrl" type="string">
+  Basescan URL for the mint transaction.
+</ResponseField>
+
+### Errors
+
+| Status | Meaning |
+|---|---|
+| `400` | Invalid `tweetUrl`, tweet failed slop check, or other validation error |
+| `401` | Missing or expired session token |
+
+### Example
+
+```bash
+curl --request POST \
+  --url https://api.reppo.xyz/pods/mint \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "tweetUrl": "https://x.com/user/status/1234567890",
+    "subnetHint": "AI Research",
+    "title": "Advances in Multimodal Models"
+  }'
+```
+
+```json
+{
+  "success": true,
+  "txHash": "0xabc123...",
+  "podId": "42",
+  "title": "Advances in Multimodal Models",
+  "description": "A thread exploring the latest developments in multimodal AI...",
+  "basescanUrl": "https://basescan.org/tx/0xabc123..."
+}
+```
+
+## List your pods
+
+`GET https://api.reppo.xyz/pods`
+
+Returns all pods owned by the authenticated wallet.
+
+### Response
+
+<ResponseField name="pods" type="array">
+  List of pods owned by the authenticated wallet.
+
+  <Expandable title="pod object properties">
+    <ResponseField name="podId" type="integer">
+      On-chain token ID of the pod.
+    </ResponseField>
+    <ResponseField name="mintTxHash" type="string">
+      Transaction hash of the original mint.
+    </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 datetime when the pod was minted.
+    </ResponseField>
+    <ResponseField name="totalEmissions" type="number">
+      Total REPPO emissions earned by this pod across all epochs.
+    </ResponseField>
+    <ResponseField name="basescanUrl" type="string">
+      Basescan URL for the mint transaction.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="count" type="integer">
+  Total number of pods returned.
+</ResponseField>
+
+### Errors
+
+| Status | Meaning |
+|---|---|
+| `401` | Missing or expired session token |
+
+### Example
+
+```bash
+curl --request GET \
+  --url https://api.reppo.xyz/pods \
+  --header 'Authorization: Bearer <token>'
+```
+
+## Check pod emissions
+
+`GET https://api.reppo.xyz/pods/{podId}/emissions`
+
+Returns per-epoch emission details and total claimable REPPO for the specified pod. Scans up to **50 epochs** per request. If `moreEpochsAvailable` is `true`, additional epochs exist beyond the current scan window.
+
+### Path parameters
+
+<ParamField path="podId" type="integer" required>
+  On-chain token ID of the pod. This is the integer `podId` returned when you minted the pod.
+</ParamField>
+
+### Response
+
+<ResponseField name="podId" type="integer">
+  The pod's on-chain token ID.
+</ResponseField>
+
+<ResponseField name="currentEpoch" type="integer">
+  The current epoch number on the network.
+</ResponseField>
+
+<ResponseField name="totalClaimable" type="string">
+  Total REPPO available to claim across all scanned epochs, as a decimal string (e.g., `"12.5"`).
+</ResponseField>
+
+<ResponseField name="epochs" type="array">
+  Per-epoch breakdown of emissions.
+
+  <Expandable title="epoch object properties">
+    <ResponseField name="epoch" type="integer">
+      Epoch number.
+    </ResponseField>
+    <ResponseField name="amount" type="string">
+      REPPO earned in this epoch, as a decimal string.
+    </ResponseField>
+    <ResponseField name="claimed" type="boolean">
+      Whether emissions for this epoch have already been claimed.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="moreEpochsAvailable" type="boolean">
+  `true` if there are additional epochs beyond the 50 scanned. Call the endpoint again to scan further epochs.
+</ResponseField>
+
+### Errors
+
+| Status | Meaning |
+|---|---|
+| `400` | Invalid `podId` |
+| `401` | Missing or expired session token |
+
+### Example
+
+```bash
+curl --request GET \
+  --url https://api.reppo.xyz/pods/42/emissions \
+  --header 'Authorization: Bearer <token>'
+```
+
+```json
+{
+  "podId": 42,
+  "currentEpoch": 105,
+  "totalClaimable": "12.5",
+  "epochs": [
+    { "epoch": 100, "amount": "2.5", "claimed": false },
+    { "epoch": 101, "amount": "4.0", "claimed": false },
+    { "epoch": 102, "amount": "6.0", "claimed": true }
+  ],
+  "moreEpochsAvailable": false
+}
+```
+
+## Claim pod emissions
+
+`POST https://api.reppo.xyz/pods/{podId}/emissions/claim`
+
+Executes on-chain claim transactions for each unclaimed epoch. Claims up to **50 epochs** per request. If `moreEpochsAvailable` is `true` in the response, call this endpoint again to claim remaining epochs.
+
+### Path parameters
+
+<ParamField path="podId" type="integer" required>
+  On-chain token ID of the pod to claim emissions for.
+</ParamField>
+
+### Response
+
+<ResponseField name="podId" type="integer">
+  The pod's on-chain token ID.
+</ResponseField>
+
+<ResponseField name="claimed" type="boolean">
+  `true` if at least one epoch was claimed successfully.
+</ResponseField>
+
+<ResponseField name="totalClaimed" type="string">
+  Total REPPO claimed in this request, as a decimal string.
+</ResponseField>
+
+<ResponseField name="txHashes" type="array">
+  List of on-chain transaction hashes, one per claimed epoch.
+</ResponseField>
+
+<ResponseField name="moreEpochsAvailable" type="boolean">
+  `true` if more unclaimed epochs remain. Call this endpoint again to claim them.
+</ResponseField>
+
+### Errors
+
+| Status | Meaning |
+|---|---|
+| `400` | Invalid `podId` or no claimable epochs found |
+| `401` | Missing or expired session token |
+
+### Example
+
+```bash
+curl --request POST \
+  --url https://api.reppo.xyz/pods/42/emissions/claim \
+  --header 'Authorization: Bearer <token>'
+```
+
+```json
+{
+  "podId": 42,
+  "claimed": true,
+  "totalClaimed": "6.5",
+  "txHashes": [
+    "0xdef456...",
+    "0xghi789..."
+  ],
+  "moreEpochsAvailable": false
+}
+```

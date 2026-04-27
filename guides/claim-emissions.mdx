@@ -1,0 +1,138 @@
+---
+title: "Check and Claim Pod REPPO Emissions"
+sidebarTitle: "Claim Emissions"
+description: "How to check per-epoch claimable REPPO emissions for your minted pods and execute on-chain claim transactions via the Reppo Chat Server."
+---
+
+Every pod you mint on Reppo earns **REPPO emissions** each epoch based on how well it performs in curation voting. Voters allocate veREPPO toward or against your pod during each 48-hour epoch, and the protocol calculates your share of emissions at epoch end. Those emissions accumulate on-chain and must be explicitly claimed — they are not pushed to your wallet automatically. This guide walks you through listing your pods, checking what you can claim, and executing the on-chain settlement.
+
+<Note>
+  Emission claims are settled on-chain via the `PodManager` contract (`0xcfF0511089D0Fbe92E1788E4aFFF3E7930b3D47c`) on Base. The Chat Server submits these transactions on your behalf using your authenticated session. Each claim call scans up to 50 epochs — call it again if `moreEpochsAvailable` is `true`.
+</Note>
+
+<Steps>
+  <Step title="Authenticate with your wallet">
+    All Chat Server endpoints require a 24-hour session token. Complete the wallet auth flow on `api.reppo.xyz` if you have not done so:
+
+    1. `POST https://api.reppo.xyz/auth/nonce` with your `walletAddress` — receive a `nonce` and a `message` to sign
+    2. Sign the message with your wallet using EIP-191 `personal_sign`
+    3. `POST https://api.reppo.xyz/auth/verify` with `walletAddress`, `signature`, and `nonce` — receive your `token`
+
+    Use the returned `token` as a Bearer token in all subsequent requests.
+  </Step>
+
+  <Step title="List your pods">
+    Retrieve all pods minted by your authenticated wallet.
+
+    ```bash
+    curl https://api.reppo.xyz/pods \
+      -H "Authorization: Bearer <YOUR_SESSION_TOKEN>"
+    ```
+
+    **Response**
+
+    ```json
+    {
+      "pods": [
+        {
+          "podId": 4271,
+          "mintTxHash": "0xabc123def456abc123def456abc123def456abc123def456abc123def456abc1",
+          "createdAt": "2025-04-10T14:22:00.000Z",
+          "totalEmissions": 47.83,
+          "basescanUrl": "https://basescan.org/tx/0xabc123def456abc123def456abc123def456abc123def456abc123def456abc1"
+        },
+        {
+          "podId": 4302,
+          "mintTxHash": "0xdef456abc123def456abc123def456abc123def456abc123def456abc123def4",
+          "createdAt": "2025-04-18T09:05:00.000Z",
+          "totalEmissions": 12.41,
+          "basescanUrl": "https://basescan.org/tx/0xdef456abc123def456abc123def456abc123def456abc123def456abc123def4"
+        }
+      ],
+      "count": 2
+    }
+    ```
+
+    Note the integer `podId` for any pod you want to check or claim emissions for.
+  </Step>
+
+  <Step title="Check claimable emissions">
+    For a specific pod, retrieve the per-epoch breakdown of claimable REPPO.
+
+    ```bash
+    curl https://api.reppo.xyz/pods/4271/emissions \
+      -H "Authorization: Bearer <YOUR_SESSION_TOKEN>"
+    ```
+
+    **Response**
+
+    ```json
+    {
+      "podId": 4271,
+      "currentEpoch": 38,
+      "totalClaimable": "47.830000000000000000",
+      "epochs": [
+        { "epoch": 35, "amount": "12.500000000000000000", "claimed": false },
+        { "epoch": 36, "amount": "18.200000000000000000", "claimed": false },
+        { "epoch": 37, "amount": "17.130000000000000000", "claimed": false }
+      ],
+      "moreEpochsAvailable": false
+    }
+    ```
+
+    | Field | Description |
+    |-------|-------------|
+    | `podId` | On-chain token ID |
+    | `currentEpoch` | The current protocol epoch |
+    | `totalClaimable` | Total unclaimed REPPO (decimal string) |
+    | `epochs` | Per-epoch breakdown with claim status |
+    | `moreEpochsAvailable` | `true` if more than 50 unclaimed epochs exist |
+
+    If `totalClaimable` is `"0.000000000000000000"` and `moreEpochsAvailable` is `false`, there is nothing to claim for this pod.
+  </Step>
+
+  <Step title="Claim emissions">
+    Execute the on-chain claim for all unclaimed epochs (up to 50 per call).
+
+    ```bash
+    curl -X POST https://api.reppo.xyz/pods/4271/emissions/claim \
+      -H "Authorization: Bearer <YOUR_SESSION_TOKEN>"
+    ```
+
+    **Response**
+
+    ```json
+    {
+      "podId": 4271,
+      "claimed": true,
+      "totalClaimed": "47.830000000000000000",
+      "txHashes": [
+        "0xabc123def456abc123def456abc123def456abc123def456abc123def456abc1",
+        "0xdef456abc123def456abc123def456abc123def456abc123def456abc123def4"
+      ],
+      "moreEpochsAvailable": false
+    }
+    ```
+
+    | Field | Description |
+    |-------|-------------|
+    | `claimed` | `true` if at least one epoch was claimed |
+    | `totalClaimed` | Total REPPO sent to your wallet (decimal string) |
+    | `txHashes` | One transaction hash per claimed epoch |
+    | `moreEpochsAvailable` | `true` if additional unclaimed epochs remain |
+
+    Each transaction hash in `txHashes` corresponds to a separate on-chain settlement on Base. You can verify each one on Basescan.
+  </Step>
+
+  <Step title="Repeat if moreEpochsAvailable is true">
+    The claim endpoint scans a maximum of 50 epochs per request. If you have a pod with many unclaimed epochs, the response will include `"moreEpochsAvailable": true`. In that case, call the same endpoint again with the same `podId` to claim the next batch.
+
+    ```bash
+    # Call again until moreEpochsAvailable is false
+    curl -X POST https://api.reppo.xyz/pods/4271/emissions/claim \
+      -H "Authorization: Bearer <YOUR_SESSION_TOKEN>"
+    ```
+
+    Repeat until you receive `"moreEpochsAvailable": false`.
+  </Step>
+</Steps>

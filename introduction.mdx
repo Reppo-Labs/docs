@@ -1,0 +1,63 @@
+---
+title: "Introduction to the Reppo Protocol"
+sidebarTitle: "Introduction"
+description: "Reppo is a decentralized protocol for sourcing and monetizing AI training data. Learn about datanets, pods, veREPPO curation, and on-chain emissions on Base."
+---
+
+Reppo is a decentralized protocol for sourcing, curating, and monetizing AI training data. It lets anyone publish content to domain-specific data markets called **datanets**, where stake-backed voters signal quality and contributors earn **REPPO** emissions. Rather than purchasing raw labor hours, Reppo creates open economic competition — aligning the interests of data publishers, curators, datanet owners, and the AI teams that consume the output.
+
+## Key concepts
+
+**Datanets** (also called subnets) are domain-specific prediction markets where data contributors publish work and put capital behind its quality. Each datanet defines its own rules: who can publish, what content qualifies, how fees are set, and how rewards flow.
+
+**Pods** are the atomic data units inside a datanet — a tweet, image, video, annotation, or any media the datanet accepts. Each pod is minted as an on-chain NFT on Base and earns REPPO emissions epoch by epoch based on how well it performs in curation voting.
+
+**veREPPO** is voting-escrow REPPO. Voters lock REPPO tokens for a chosen duration to receive veREPPO, which gives them curation authority. Larger locks and longer durations yield more voting power per token. Splitting tokens across multiple identities does not multiply power, making Sybil attacks economically ineffective.
+
+**Epochs** are 48-hour windows during which publishers submit pods, voters allocate veREPPO, and rewards accrue. Voting power decays linearly throughout each epoch — earlier votes carry more weight — and at epoch end the network calculates emissions. The Performance Pool distributes every third epoch.
+
+## Participants
+
+| Role | What they do |
+|------|--------------|
+| **Publishers** | Submit content to datanets, pay a publishing fee, and earn REPPO emissions when their work is well-curated |
+| **Voters** | Lock REPPO for veREPPO and allocate voting power across datanets and pods each epoch |
+| **Datanet owners** | Define the rules, fees, and incentive structure of a domain-specific data market |
+| **AI teams** | Access curated, high-signal datasets and preference signals from datanets |
+
+## On-chain infrastructure
+
+All on-chain activity runs on **Base** (chain ID `8453`). The contracts you interact with directly are:
+
+| Contract | Address | Purpose |
+|----------|---------|---------|
+| PodManager | `0xcfF0511089D0Fbe92E1788E4aFFF3E7930b3D47c` | Mint pods as NFTs and claim REPPO emissions |
+| REPPO Token | `0xFf8104251E7761163faC3211eF5583FB3F8583d6` | ERC-20 token used for minting fees and emissions |
+| USDC | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` | Payment token accepted for X Agent pod mints |
+
+<Note>
+  Reppo is not an L1 or L2 network. It is a protocol layer built on Base.
+</Note>
+
+## Explore the docs
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/authentication">
+    Set up Privy session cookies or wallet signature auth before making your first call.
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Fetch live network stats, list public pods, and create your first pod draft.
+  </Card>
+  <Card title="Datanets" icon="network-wired" href="/concepts/datanets">
+    Understand how domain-specific data markets work and how to create one.
+  </Card>
+  <Card title="Pods" icon="box" href="/concepts/pods">
+    Learn how to publish, mint, vote on, and claim emissions from pods.
+  </Card>
+  <Card title="Votes & Curation" icon="thumbs-up" href="/concepts/votes-curation">
+    Stake-assured human feedback, veREPPO mechanics, and epoch voting rules.
+  </Card>
+  <Card title="Staking & Emissions" icon="coins" href="/concepts/staking-emissions">
+    Lock REPPO for veREPPO, earn from curation, and claim pod emissions on Base.
+  </Card>
+</CardGroup>

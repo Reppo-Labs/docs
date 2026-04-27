@@ -1,0 +1,539 @@
+---
+title: "Pod API Endpoints — Platform API"
+sidebarTitle: "Pods"
+description: "Create pod drafts, record on-chain mints and republishes, query your own pods, and browse the public pod catalog — all via the Reppo Platform API."
+---
+
+Pods are the individual data units published into datanets on Reppo. Each pod represents a piece of content (article, dataset, social post, PDF, or video) minted as an NFT on Base. The Platform API lets you create pod drafts, record on-chain mints, republish pods across datanets, and retrieve both your own pods and the public pod catalog. Authenticated endpoints require a valid `privy-token` cookie.
+
+---
+
+## List my pods
+
+<br />
+
+```
+GET /me/pods
+```
+
+Returns all pods created by the authenticated user.
+
+**Auth:** Privy cookie
+
+**Response `200`**
+
+```json
+{
+  "data": {
+    "pods": [UserPod]
+  }
+}
+```
+
+### Example
+
+```bash
+curl https://reppo.ai/api/v1/me/pods \
+  -H "Cookie: privy-token=<your-privy-token>"
+```
+
+---
+
+## Create a pod draft
+
+<br />
+
+```
+POST /me/pods
+```
+
+Creates a new pod draft. The pod is not on-chain until you call the mint endpoint with a valid transaction hash.
+
+**Auth:** Privy cookie
+
+### Request body
+
+<ParamField body="subnetId" type="string" required>
+  ID of the datanet this pod will be published into.
+</ParamField>
+
+<ParamField body="podName" type="string" required>
+  Display name of the pod. Between 3 and 50 characters.
+</ParamField>
+
+<ParamField body="url" type="string (uri)" required>
+  Canonical URL of the content (e.g., the original article or social post).
+</ParamField>
+
+<ParamField body="platform" type="string" required>
+  Platform the content originates from (e.g., `X`, `Substack`, `YouTube`). Between 2 and 50 characters.
+</ParamField>
+
+<ParamField body="category" type="string" required>
+  Category label for the content (e.g., `AI Research`, `DeFi`). Between 2 and 50 characters.
+</ParamField>
+
+<ParamField body="imageURL" type="string (uri)">
+  URL to the pod's cover image. Optional.
+</ParamField>
+
+<ParamField body="thumbnailURL" type="string (uri)">
+  URL to a thumbnail image. Optional.
+</ParamField>
+
+<ParamField body="pdfURL" type="string (uri)">
+  URL to a PDF version of the content. Optional.
+</ParamField>
+
+<ParamField body="videoURL" type="string (uri)">
+  URL to a video version of the content. Optional.
+</ParamField>
+
+<ParamField body="podDescription" type="string" required>
+  Short description of the pod's content. Between 10 and 200 characters.
+</ParamField>
+
+<ParamField body="agreeToTerms" type="boolean" required>
+  Must be `true`. Confirms the publisher agrees to the Reppo terms of service.
+</ParamField>
+
+**Response `201`**
+
+```json
+{
+  "data": {
+    "id": "pod_xyz789"
+  }
+}
+```
+
+### Example
+
+```bash
+curl -X POST https://reppo.ai/api/v1/me/pods \
+  -H "Cookie: privy-token=<your-privy-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "subnetId": "subnet_abc123",
+    "podName": "Attention Is All You Need — Summary",
+    "url": "https://arxiv.org/abs/1706.03762",
+    "platform": "ArXiv",
+    "category": "AI Research",
+    "podDescription": "A concise summary of the original Transformer architecture paper.",
+    "agreeToTerms": true
+  }'
+```
+
+---
+
+## Get one of my pods
+
+<br />
+
+```
+GET /me/pods/{id}
+```
+
+Returns a single pod owned by the authenticated user, including moderation status and voting volumes.
+
+**Auth:** Privy cookie
+
+### Path parameters
+
+<ParamField path="id" type="string" required>
+  The pod's internal ID.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": {
+    "pod": UserPod
+  }
+}
+```
+
+---
+
+## Mint a pod
+
+<br />
+
+```
+POST /me/pods/{id}/mint
+```
+
+Records the on-chain mint of a pod draft. Submit this after the Base transaction has been confirmed.
+
+**Auth:** Privy cookie
+
+### Path parameters
+
+<ParamField path="id" type="string" required>
+  The pod's internal ID.
+</ParamField>
+
+### Request body
+
+<ParamField body="podId" type="string" required>
+  The pod's internal ID (must match the path parameter).
+</ParamField>
+
+<ParamField body="txHash" type="string" required>
+  Transaction hash of the on-chain mint.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": { "success": true }
+}
+```
+
+### Example
+
+```bash
+curl -X POST https://reppo.ai/api/v1/me/pods/pod_xyz789/mint \
+  -H "Cookie: privy-token=<your-privy-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "podId": "pod_xyz789",
+    "txHash": "0xabc123..."
+  }'
+```
+
+---
+
+## Republish a pod
+
+<br />
+
+```
+POST /me/pods/{id}/republish
+```
+
+Records an on-chain republish of an existing pod into a new or the same datanet.
+
+**Auth:** Privy cookie
+
+### Path parameters
+
+<ParamField path="id" type="string" required>
+  The pod's internal ID.
+</ParamField>
+
+### Request body
+
+<ParamField body="podId" type="string" required>
+  The pod's internal ID.
+</ParamField>
+
+<ParamField body="txHash" type="string" required>
+  Transaction hash of the on-chain republish transaction.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": { "success": true }
+}
+```
+
+---
+
+## Get pods voted on during an epoch
+
+<br />
+
+```
+GET /me/pods/votes/epochs/{epochId}
+```
+
+Returns the list of pods the authenticated user voted on during the specified epoch.
+
+**Auth:** Privy cookie
+
+### Path parameters
+
+<ParamField path="epochId" type="integer" required>
+  The epoch number to query.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": {
+    "pods": [UserPod]
+  }
+}
+```
+
+---
+
+## List public pods
+
+<br />
+
+```
+GET /public/pods
+```
+
+Returns active public pods across all datanets. No authentication required. Supports pagination, search, and filtering by epoch and datanet.
+
+### Query parameters
+
+<ParamField query="page" type="integer">
+  Page number. Minimum `1`. Default `1`.
+</ParamField>
+
+<ParamField query="limit" type="integer">
+  Results per page. Minimum `1`. Default `10`.
+</ParamField>
+
+<ParamField query="search" type="string">
+  Free-text search against pod name and description.
+</ParamField>
+
+<ParamField query="filters[currentEpoch]" type="integer">
+  Filter pods active in a specific epoch number.
+</ParamField>
+
+<ParamField query="filters[subnet]" type="string">
+  Filter pods by datanet ID.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": {
+    "pods": [PublicPod]
+  }
+}
+```
+
+### Example
+
+```bash
+curl "https://reppo.ai/api/v1/public/pods?page=1&limit=10&filters[subnet]=subnet_abc123"
+```
+
+---
+
+## Get a public pod by ID
+
+<br />
+
+```
+GET /public/pods/{podId}
+```
+
+Returns a single public pod by its internal ID, including creator info and cumulative vote volumes. No authentication required.
+
+### Path parameters
+
+<ParamField path="podId" type="string" required>
+  The pod's internal ID.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": {
+    "pod": PublicPod
+  }
+}
+```
+
+### Example
+
+```bash
+curl https://reppo.ai/api/v1/public/pods/pod_xyz789
+```
+
+---
+
+## Get public pod votes for an epoch
+
+<br />
+
+```
+GET /public/pods/{podId}/votes/epochs/{epoch}
+```
+
+Returns all votes cast for a pod during a specific epoch. No authentication required.
+
+### Path parameters
+
+<ParamField path="podId" type="string" required>
+  The pod's internal ID.
+</ParamField>
+
+<ParamField path="epoch" type="integer" required>
+  The epoch number to query.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": {
+    "podVotes": [
+      {
+        "id": "vote_001",
+        "userId": "user_abc",
+        "votes": 150.0,
+        "createdAt": "2025-04-01T12:00:00Z",
+        "voter": "0xVoterAddress",
+        "epoch": 42,
+        "upVote": true
+      }
+    ]
+  }
+}
+```
+
+---
+
+## UserPod schema
+
+Returned by authenticated pod endpoints (`/me/pods/*`).
+
+<ResponseField name="id" type="string" required>
+  Internal pod ID.
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+  Display name of the pod.
+</ResponseField>
+
+<ResponseField name="description" type="string" required>
+  Short description of the pod's content.
+</ResponseField>
+
+<ResponseField name="tokenId" type="integer | null">
+  On-chain NFT token ID. `null` until the pod is minted.
+</ResponseField>
+
+<ResponseField name="privateSubnetId" type="string" required>
+  Internal ID of the datanet this pod belongs to.
+</ResponseField>
+
+<ResponseField name="url" type="string (uri)" required>
+  Canonical URL of the original content.
+</ResponseField>
+
+<ResponseField name="imageUrl" type="string | null">
+  URL to the pod's cover image.
+</ResponseField>
+
+<ResponseField name="thumbnailUrl" type="string | null">
+  URL to the pod's thumbnail image.
+</ResponseField>
+
+<ResponseField name="status" type="string" required>
+  Current status (e.g., `draft`, `active`).
+</ResponseField>
+
+<ResponseField name="banned" type="boolean" required>
+  Whether this pod has been banned from the platform.
+</ResponseField>
+
+<ResponseField name="banReason" type="string | null">
+  Reason for the ban, if applicable.
+</ResponseField>
+
+<ResponseField name="podValidityEpoch" type="integer" required>
+  The epoch through which this pod is considered valid for curation rewards.
+</ResponseField>
+
+<ResponseField name="cumulativeUpVotesVolume" type="number" required>
+  Total weighted up-vote volume accumulated across all epochs.
+</ResponseField>
+
+<ResponseField name="cumulativeDownVotesVolume" type="number" required>
+  Total weighted down-vote volume accumulated across all epochs.
+</ResponseField>
+
+<ResponseField name="createdAt" type="string (date-time)" required>
+  ISO 8601 timestamp of when the pod was created.
+</ResponseField>
+
+<ResponseField name="updatedAt" type="string (date-time)" required>
+  ISO 8601 timestamp of the last update.
+</ResponseField>
+
+---
+
+## PublicPod schema
+
+Returned by unauthenticated pod endpoints (`/public/pods/*`). Includes creator info and media URLs.
+
+<ResponseField name="id" type="string" required>
+  Internal pod ID.
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+  Display name of the pod.
+</ResponseField>
+
+<ResponseField name="description" type="string" required>
+  Short description of the pod's content.
+</ResponseField>
+
+<ResponseField name="tokenId" type="integer" required>
+  On-chain NFT token ID.
+</ResponseField>
+
+<ResponseField name="privateSubnetId" type="string" required>
+  Internal ID of the datanet this pod belongs to.
+</ResponseField>
+
+<ResponseField name="url" type="string (uri)" required>
+  Canonical URL of the original content.
+</ResponseField>
+
+<ResponseField name="imageUrl" type="string | null">
+  URL to the pod's cover image.
+</ResponseField>
+
+<ResponseField name="thumbnailUrl" type="string | null">
+  URL to the pod's thumbnail.
+</ResponseField>
+
+<ResponseField name="videoUrl" type="string | null">
+  URL to a video version of the content.
+</ResponseField>
+
+<ResponseField name="pdfUrl" type="string | null">
+  URL to a PDF version of the content.
+</ResponseField>
+
+<ResponseField name="creator" type="object" required>
+  Object containing the creator's `id` (string, required), `username` (string | null), and `avatarUrl` (string | null).
+</ResponseField>
+
+<ResponseField name="createdAt" type="string (date-time)" required>
+  ISO 8601 timestamp of when the pod was created.
+</ResponseField>
+
+<ResponseField name="updatedAt" type="string (date-time)" required>
+  ISO 8601 timestamp of the last update.
+</ResponseField>
+
+<ResponseField name="podValidityEpoch" type="integer" required>
+  The epoch through which this pod is valid for curation rewards.
+</ResponseField>
+
+<ResponseField name="cumulativeUpVotesVolume" type="number" required>
+  Total weighted up-vote volume.
+</ResponseField>
+
+<ResponseField name="cumulativeDownVotesVolume" type="number" required>
+  Total weighted down-vote volume.
+</ResponseField>

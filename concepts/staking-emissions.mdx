@@ -1,0 +1,108 @@
+---
+title: "Staking REPPO and Earning Emissions"
+sidebarTitle: "Staking & Emissions"
+description: "Lock REPPO to earn veREPPO voting power, participate in epoch-based curation, and receive emissions as a publisher, voter, or datanet owner."
+---
+
+Staking on Reppo means locking REPPO tokens to receive veREPPO — your stake-backed curation authority. The lock is real: your tokens become illiquid for the chosen duration. In exchange, you gain voting power that lets you curate pods, earn curation rewards, and influence how emissions flow across the network.
+
+## Locking REPPO for veREPPO
+
+```
+REPPO locked + lock duration → veREPPO
+```
+
+Once you lock REPPO:
+
+- Your tokens are illiquid until the lock expires — you cannot withdraw early
+- You can reallocate how your veREPPO is distributed across datanets each epoch
+- A larger lock and a longer duration both increase your voting power per token
+
+<Note>
+  Splitting your REPPO across multiple wallets does not increase your total voting power. The stake-weighted model is designed so that Sybil strategies are economically self-defeating.
+</Note>
+
+## Epochs
+
+An **epoch** is the fundamental time unit of the Reppo protocol — a 48-hour window during which all curation and reward activity takes place:
+
+- Publishers submit pods to datanets
+- Voters allocate veREPPO across datanets and specific pods
+- Voting power decays linearly from the start of the epoch to the end
+- Rewards accrue based on vote tallies and fee accumulation
+
+At the close of each epoch, the network calculates rewards. The **Performance Pool** has a separate, slower cadence: it distributes every third epoch.
+
+## Who earns emissions
+
+REPPO emissions flow to three groups each epoch based on their contribution to the network:
+
+| Recipient | Basis for reward |
+|---|---|
+| **Publishers** | How well their pods performed in voting during the epoch |
+| **Voters** | Accuracy and conviction of their curation relative to final outcomes |
+| **Datanet owners** | Datanet performance across fees, volume, and staked REPPO |
+
+## Performance Pool distribution
+
+The Performance Pool accumulates from creation fees (50%), publishing fees (10%), and access fees (10%). It distributes every third epoch:
+
+- **80%** to REPPO stakers
+- **20%** to datanet owners
+
+The distribution is weighted across datanets by four metrics:
+
+| Metric | Weight |
+|---|---|
+| EVOF (epoch-weighted output factor) | 40% |
+| Staked REPPO | 25% |
+| Trading volume | 20% |
+| Total fees collected | 15% |
+
+Datanets that generate more activity, attract more staked capital, and produce higher fee revenue receive a proportionally larger share of each distribution.
+
+## Amplifi staking
+
+In addition to curation staking, Reppo supports **Amplifi staking** — a separate staking program with its own reward structure. To record an Amplifi stake:
+
+```bash
+POST /api/v1/stakes/amplifi
+```
+
+The request requires `amount`, `subnetId`, and `txHash`. Amplifi stakes are scoped to a specific datanet and operate independently of your veREPPO lock.
+
+## Claiming pod emissions
+
+For pods minted on-chain, you claim emissions through the Chat Server API at `https://api.reppo.xyz`. Claims execute as on-chain transactions via the `PodManager` contract on Base.
+
+```bash
+# Check claimable emissions (scans up to 50 epochs)
+GET https://api.reppo.xyz/pods/{podId}/emissions
+
+# Execute on-chain claim for all pending epochs
+POST https://api.reppo.xyz/pods/{podId}/emissions/claim
+```
+
+Both endpoints require a wallet session token. Authenticate first using the two-step wallet sign-in flow:
+
+<Steps>
+  <Step title="Request a nonce">
+    ```bash
+    POST https://api.reppo.xyz/auth/nonce
+    ```
+    Provide your wallet address. You receive a nonce and a message to sign. Nonces expire after 5 minutes.
+  </Step>
+  <Step title="Verify your signature">
+    ```bash
+    POST https://api.reppo.xyz/auth/verify
+    ```
+    Submit your wallet address, the EIP-191 signature, and the nonce. You receive a 24-hour session token to use as a Bearer token on subsequent requests.
+  </Step>
+  <Step title="Call the emissions endpoints">
+    Include `Authorization: Bearer <session-token>` on calls to `GET /pods/{podId}/emissions` and `POST /pods/{podId}/emissions/claim`.
+  </Step>
+</Steps>
+
+<Tip>
+  Always call `GET /pods/{podId}/emissions` before claiming. It returns a per-epoch breakdown so you can confirm what will be claimed before the on-chain transaction executes.
+</Tip>

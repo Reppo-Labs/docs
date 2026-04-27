@@ -1,0 +1,83 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "luma",
+  "name": "Reppo API Docs",
+  "colors": {
+    "primary": "#ea8d3a",
+    "dark": "#fd4926",
+    "light": "#c94106"
+  },
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/Reppo-Labs"
+    }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "authentication",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/datanets",
+              "concepts/pods",
+              "concepts/votes-curation",
+              "concepts/staking-emissions"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/create-datanet",
+              "guides/publish-pod",
+              "guides/mint-tweet",
+              "guides/claim-emissions",
+              "guides/agent-integration"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Platform API",
+            "pages": [
+              "api/overview",
+              "api/subnets",
+              "api/pods",
+              "api/engagement",
+              "api/stakes",
+              "api/locks",
+              "api/stats"
+            ]
+          },
+          {
+            "group": "Agent API",
+            "pages": [
+              "api/agent/auth",
+              "api/agent/chat",
+              "api/agent/minting",
+              "api/agent/agents",
+              "api/agent/ab-testing"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/images/reppoIconBlack.svg",
+    "dark": "/images/reppoIconRed.png"
+  }
+}

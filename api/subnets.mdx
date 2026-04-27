@@ -1,0 +1,551 @@
+---
+title: "Datanet (Subnet) API Endpoints"
+sidebarTitle: "Datanets"
+description: "Create, publish, and manage datanets (subnets) on Reppo — including fee updates, emissions config, and public discovery endpoints."
+---
+
+Datanets (referred to as subnets in the API) are the curated data markets at the heart of the Reppo protocol. Each datanet has its own token economics — access fees, publishing fees, and per-epoch REPPO and primary-token emissions — all of which are configured on-chain and then recorded via these endpoints. Authenticated endpoints require a valid `privy-token` cookie.
+
+---
+
+## List my subnets
+
+<br />
+
+```
+GET /me/subnets
+```
+
+Returns all datanets created by the authenticated user.
+
+**Auth:** Privy cookie
+
+**Response**
+
+```json
+{
+  "data": {
+    "subnets": [Subnet]
+  }
+}
+```
+
+### Example
+
+```bash
+curl https://reppo.ai/api/v1/me/subnets \
+  -H "Cookie: privy-token=<your-privy-token>"
+```
+
+---
+
+## Create a subnet draft
+
+<br />
+
+```
+POST /me/subnets
+```
+
+Creates a new datanet draft. The datanet is not live on-chain until you call the publish endpoint. Returns the internal ID of the newly created draft.
+
+**Auth:** Privy cookie
+
+### Request body
+
+<ParamField body="subnetCreatorType" type="string" required>
+  Creator type. Must be one of `individual` or `team`.
+</ParamField>
+
+<ParamField body="subnetName" type="string" required>
+  Display name for the datanet. Maximum 100 characters.
+</ParamField>
+
+<ParamField body="imageURL" type="string (uri)">
+  URL to the datanet's cover image. Optional.
+</ParamField>
+
+<ParamField body="subnetDescription" type="string" required>
+  Description of the datanet's purpose and focus. Between 10 and 500 characters.
+</ParamField>
+
+<ParamField body="onboardingPublishers" type="string" required>
+  Instructions shown to publishers joining this datanet. Between 10 and 1000 characters.
+</ParamField>
+
+<ParamField body="onboardingVoters" type="string" required>
+  Instructions shown to voters in this datanet. Between 10 and 1000 characters.
+</ParamField>
+
+<ParamField body="subnetGoal" type="string" required>
+  Short statement of the datanet's data goal. Maximum 100 characters.
+</ParamField>
+
+<ParamField body="nativeTokenAddress" type="string" required>
+  Contract address of the primary token used for emissions alongside REPPO.
+</ParamField>
+
+<ParamField body="nativeTokenSymbol" type="string" required>
+  Ticker symbol of the primary token. Maximum 5 characters.
+</ParamField>
+
+<ParamField body="nativeTokenDecimals" type="integer" required>
+  Decimal precision of the primary token. Must be between 1 and 18.
+</ParamField>
+
+**Response `201`**
+
+```json
+{
+  "data": {
+    "id": "subnet_abc123"
+  }
+}
+```
+
+### Example
+
+```bash
+curl -X POST https://reppo.ai/api/v1/me/subnets \
+  -H "Cookie: privy-token=<your-privy-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "subnetCreatorType": "individual",
+    "subnetName": "AI Research Papers",
+    "subnetDescription": "A datanet focused on curating high-quality AI research paper summaries.",
+    "onboardingPublishers": "Publish concise summaries of peer-reviewed AI papers published in the last 12 months.",
+    "onboardingVoters": "Evaluate summaries for accuracy, clarity, and relevance to current AI research.",
+    "subnetGoal": "Curate the best AI research summaries",
+    "nativeTokenAddress": "0xTokenAddress",
+    "nativeTokenSymbol": "AITKN",
+    "nativeTokenDecimals": 18
+  }'
+```
+
+---
+
+## Get one of my subnets
+
+<br />
+
+```
+GET /me/subnets/{id}
+```
+
+Returns a single datanet owned by the authenticated user.
+
+**Auth:** Privy cookie
+
+### Path parameters
+
+<ParamField path="id" type="string" required>
+  The datanet's internal ID.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": {
+    "subnet": Subnet
+  }
+}
+```
+
+---
+
+## Publish a subnet
+
+<br />
+
+```
+POST /me/subnets/{id}/publish
+```
+
+Records the on-chain publication of a datanet draft. You must have already submitted the publish transaction on Base and obtained the transaction hash before calling this endpoint.
+
+**Auth:** Privy cookie
+
+### Path parameters
+
+<ParamField path="id" type="string" required>
+  The datanet's internal ID.
+</ParamField>
+
+### Request body
+
+<ParamField body="subnetId" type="string" required>
+  The datanet's internal ID (must match the path parameter).
+</ParamField>
+
+<ParamField body="txHash" type="string" required>
+  The transaction hash of the on-chain publish transaction.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": { "success": true }
+}
+```
+
+---
+
+## Update REPPO access fee
+
+<br />
+
+```
+POST /me/subnets/{id}/access-fee/reppo
+```
+
+Updates the REPPO access fee for a datanet after the corresponding on-chain transaction has been submitted.
+
+**Auth:** Privy cookie
+
+### Path parameters
+
+<ParamField path="id" type="string" required>
+  The datanet's internal ID.
+</ParamField>
+
+### Request body
+
+<ParamField body="subnetId" type="string" required>
+  The datanet's internal ID.
+</ParamField>
+
+<ParamField body="accessFeeREPPO" type="number" required>
+  New access fee denominated in REPPO.
+</ParamField>
+
+<ParamField body="txHash" type="string" required>
+  Transaction hash of the on-chain fee update.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": { "success": true }
+}
+```
+
+---
+
+## Update pod publishing fee
+
+<br />
+
+```
+POST /me/subnets/{id}/pod-publishing-fee/reppo
+```
+
+Updates the REPPO fee charged to publishers minting pods into this datanet.
+
+**Auth:** Privy cookie
+
+### Path parameters
+
+<ParamField path="id" type="string" required>
+  The datanet's internal ID.
+</ParamField>
+
+### Request body
+
+<ParamField body="subnetId" type="string" required>
+  The datanet's internal ID.
+</ParamField>
+
+<ParamField body="publishingFeeREPPO" type="number" required>
+  New publishing fee denominated in REPPO.
+</ParamField>
+
+<ParamField body="txHash" type="string" required>
+  Transaction hash of the on-chain fee update.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": { "success": true }
+}
+```
+
+---
+
+## Update pod republishing fee
+
+<br />
+
+```
+POST /me/subnets/{id}/pod-republishing-fee/reppo
+```
+
+Updates the REPPO fee charged when a pod is republished into this datanet.
+
+**Auth:** Privy cookie
+
+### Path parameters
+
+<ParamField path="id" type="string" required>
+  The datanet's internal ID.
+</ParamField>
+
+### Request body
+
+<ParamField body="subnetId" type="string" required>
+  The datanet's internal ID.
+</ParamField>
+
+<ParamField body="republishingFeeREPPO" type="number" required>
+  New republishing fee denominated in REPPO.
+</ParamField>
+
+<ParamField body="txHash" type="string" required>
+  Transaction hash of the on-chain fee update.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": { "success": true }
+}
+```
+
+---
+
+## Update REPPO emissions per epoch
+
+<br />
+
+```
+POST /me/subnets/{id}/emissions-per-epoch/reppo
+```
+
+Updates the amount of REPPO emitted to curators per epoch in this datanet.
+
+**Auth:** Privy cookie
+
+### Path parameters
+
+<ParamField path="id" type="string" required>
+  The datanet's internal ID.
+</ParamField>
+
+### Request body
+
+<ParamField body="subnetId" type="string" required>
+  The datanet's internal ID.
+</ParamField>
+
+<ParamField body="emissionsPerEpochREPPO" type="number" required>
+  New REPPO emission rate per epoch.
+</ParamField>
+
+<ParamField body="txHash" type="string" required>
+  Transaction hash of the on-chain update.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": { "success": true }
+}
+```
+
+---
+
+## Update primary token emissions per epoch
+
+<br />
+
+```
+POST /me/subnets/{id}/emissions-per-epoch/primary-token
+```
+
+Updates the amount of the primary token emitted to curators per epoch in this datanet.
+
+**Auth:** Privy cookie
+
+### Path parameters
+
+<ParamField path="id" type="string" required>
+  The datanet's internal ID.
+</ParamField>
+
+### Request body
+
+<ParamField body="subnetId" type="string" required>
+  The datanet's internal ID.
+</ParamField>
+
+<ParamField body="emissionsPerEpochPrimaryToken" type="number" required>
+  New primary token emission rate per epoch.
+</ParamField>
+
+<ParamField body="txHash" type="string" required>
+  Transaction hash of the on-chain update.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": { "success": true }
+}
+```
+
+---
+
+## List public subnets
+
+<br />
+
+```
+GET /public/subnets
+```
+
+Returns all active public datanets. No authentication required. Supports pagination and search.
+
+### Query parameters
+
+<ParamField query="page" type="integer">
+  Page number. Minimum `1`. Default `1`.
+</ParamField>
+
+<ParamField query="limit" type="integer">
+  Number of results per page. Minimum `1`. Default `10`.
+</ParamField>
+
+<ParamField query="search" type="string">
+  Free-text search term filtered against datanet name and description.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": {
+    "subnets": [Subnet]
+  }
+}
+```
+
+### Example
+
+```bash
+curl "https://reppo.ai/api/v1/public/subnets?page=1&limit=20&search=AI"
+```
+
+---
+
+## Get a public subnet by ID
+
+<br />
+
+```
+GET /public/subnets/{id}
+```
+
+Returns a single public datanet by its internal ID. No authentication required.
+
+### Path parameters
+
+<ParamField path="id" type="string" required>
+  The datanet's internal ID.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": {
+    "subnet": Subnet
+  }
+}
+```
+
+### Example
+
+```bash
+curl https://reppo.ai/api/v1/public/subnets/subnet_abc123
+```
+
+---
+
+## Subnet schema
+
+The `Subnet` object is returned by all subnet endpoints.
+
+<ResponseField name="id" type="string" required>
+  Internal datanet ID.
+</ResponseField>
+
+<ResponseField name="subnetName" type="string" required>
+  Display name of the datanet.
+</ResponseField>
+
+<ResponseField name="subnetDescription" type="string" required>
+  Description of the datanet's focus and curation criteria.
+</ResponseField>
+
+<ResponseField name="thumbnailUrl" type="string | null">
+  URL to the datanet thumbnail image.
+</ResponseField>
+
+<ResponseField name="nativeTokenAddress" type="string" required>
+  Contract address of the primary token.
+</ResponseField>
+
+<ResponseField name="nativeTokenSymbol" type="string" required>
+  Ticker symbol of the primary token.
+</ResponseField>
+
+<ResponseField name="nativeTokenDecimals" type="integer" required>
+  Decimal precision of the primary token.
+</ResponseField>
+
+<ResponseField name="tokenId" type="integer | null">
+  On-chain token ID assigned after the datanet is published. `null` while in draft status.
+</ResponseField>
+
+<ResponseField name="accessFeeREPPO" type="number" required>
+  Fee in REPPO required to access this datanet.
+</ResponseField>
+
+<ResponseField name="emissionsPerEpochREPPO" type="number" required>
+  REPPO emitted to curators per epoch.
+</ResponseField>
+
+<ResponseField name="emissionsPerEpochPrimaryToken" type="number" required>
+  Primary token emitted to curators per epoch.
+</ResponseField>
+
+<ResponseField name="status" type="string" required>
+  Current status of the datanet (e.g., `draft`, `active`).
+</ResponseField>
+
+<ResponseField name="upVoteVolume" type="number" required>
+  Cumulative up-vote volume across all pods in this datanet.
+</ResponseField>
+
+<ResponseField name="downVoteVolume" type="number" required>
+  Cumulative down-vote volume across all pods in this datanet.
+</ResponseField>
+
+<ResponseField name="onboardingPublishers" type="string" required>
+  Onboarding instructions for publishers.
+</ResponseField>
+
+<ResponseField name="onboardingVoters" type="string" required>
+  Onboarding instructions for voters.
+</ResponseField>
+
+<ResponseField name="createdByUserId" type="string" required>
+  Internal ID of the user who created this datanet.
+</ResponseField>

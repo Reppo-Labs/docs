@@ -1,0 +1,80 @@
+---
+title: "Mint a Tweet as a Pod NFT on Base"
+sidebarTitle: "Mint a Tweet"
+description: "Use the Reppo Chat Server to mint any X/Twitter post as an on-chain NFT pod on Base, with AI metadata generation and slop detection built in."
+---
+
+The Reppo Chat Server provides a single-endpoint minting flow that handles everything from fetching the tweet to settling the NFT on Base. You provide a URL; the server fetches the post, runs an AI content-quality check (slop detection), generates metadata, mints the pod via the `PodManager` contract, and indexes it on the Reppo platform — all in one request.
+
+<Warning>
+  Slop detection is an AI-powered filter that rejects content deemed low-quality or AI-generated. If your tweet is flagged, the mint is aborted and you receive a 400 error. You can bypass this filter with `"skipSlopCheck": true`, but doing so may result in a pod that performs poorly in curation voting.
+</Warning>
+
+<Steps>
+  <Step title="Authenticate with your wallet">
+    The minting endpoint requires a 24-hour session token obtained via the wallet authentication flow on `api.reppo.xyz`. If you have not done this yet, follow the `/authentication` guide to complete the nonce → sign → verify flow.
+
+    Once authenticated, you will have a `token` value to use as a Bearer token in subsequent requests.
+  </Step>
+
+  <Step title="Call the mint endpoint">
+    Send a `POST` request to `https://api.reppo.xyz/pods/mint` with your tweet URL and any optional parameters.
+
+    **Request body schema**
+
+    | Field | Type | Constraints | Required |
+    |-------|------|-------------|----------|
+    | `tweetUrl` | string (URI) | X/Twitter post URL | Yes |
+    | `subnetHint` | string | Subnet name or ID to mint into | No |
+    | `title` | string | Max 80 characters; auto-generated if omitted | No |
+    | `skipSlopCheck` | boolean | Defaults to `false` | No |
+
+    ```bash
+    curl -X POST https://api.reppo.xyz/pods/mint \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer <YOUR_SESSION_TOKEN>" \
+      -d '{
+        "tweetUrl": "https://x.com/defiresearcher/status/1234567890123456789",
+        "subnetHint": "Base DeFi Research",
+        "title": "Base TVL Breakdown Q2 2025",
+        "skipSlopCheck": false
+      }'
+    ```
+  </Step>
+
+  <Step title="Handle the response">
+    A successful mint returns the on-chain transaction hash, the pod token ID, AI-generated metadata, and a direct Basescan link.
+
+    ```json
+    {
+      "success": true,
+      "txHash": "0xabc123def456abc123def456abc123def456abc123def456abc123def456abc1",
+      "podId": "4271",
+      "title": "Base TVL Breakdown Q2 2025",
+      "description": "A detailed breakdown of Base TVL composition by protocol category, drawing on on-chain data to compare lending, DEX, and yield sectors in Q2 2025.",
+      "basescanUrl": "https://basescan.org/tx/0xabc123def456abc123def456abc123def456abc123def456abc123def456abc1"
+    }
+    ```
+
+    | Field | Description |
+    |-------|-------------|
+    | `success` | `true` if the mint completed |
+    | `txHash` | On-chain transaction hash |
+    | `podId` | NFT token ID (integer as string) |
+    | `title` | Final pod title (AI-generated or your custom value) |
+    | `description` | AI-generated pod description |
+    | `basescanUrl` | Direct link to the transaction on Basescan |
+
+    Save `podId` — you will need it to check and claim emissions.
+  </Step>
+
+  <Step title="Verify on Basescan">
+    Open the `basescanUrl` from the response to confirm the on-chain mint. The transaction will show the `PodManager` contract (`0xcfF0511089D0Fbe92E1788E4aFFF3E7930b3D47c`) as the recipient and record your wallet as the NFT owner on Base.
+
+    Once the transaction is indexed, your pod appears in the Reppo platform and begins accumulating voting signals in the current epoch.
+  </Step>
+</Steps>
+
+<Note>
+  Minting fees are paid in **REPPO token** (`0xFf8104251E7761163faC3211eF5583FB3F8583d6`) for standard mints. X Agent (automated) mints use **USDC** (`0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`) instead. Both contracts are on Base (chain ID 8453).
+</Note>

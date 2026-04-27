@@ -1,0 +1,68 @@
+---
+title: "Reppo API Overview and Base URLs"
+sidebarTitle: "Overview"
+description: "Reppo exposes two API surfaces — Platform API and Agent API — each with distinct base URLs and auth methods. Learn the error format and HTTP status codes."
+---
+
+The Reppo API is split into two surfaces: the **Platform API**, which handles subnets, pods, votes, stakes, locks, and stats, and the **Agent API**, which powers wallet-based chat, autonomous minting, and agent registration. Both surfaces share the same base domain but differ in host and authentication model depending on the endpoint group.
+
+## Base URLs
+
+| Surface | Base URL |
+|---|---|
+| Platform API | `https://reppo.ai/api/v1` |
+| Agent API (Chat Server) | `https://api.reppo.xyz` |
+| Agent API (Platform endpoints) | `https://reppo.ai/api/v1` |
+
+All paths in this reference are relative to the base URL for their surface. For example, `GET /me/subnets` resolves to `https://reppo.ai/api/v1/me/subnets`.
+
+## Authentication
+
+Different endpoint groups use different authentication methods. The table below summarises all four schemes.
+
+| Method | Mechanism | Applies to |
+|---|---|---|
+| Privy cookie | `privy-token` cookie | Platform API `/me/*` endpoints |
+| Wallet session token | `Authorization: Bearer <token>` | Chat Server endpoints (`api.reppo.xyz`) |
+| Agent bearer token | `Authorization: Bearer <AGENT_FLOW_API_KEY>` | Agent platform endpoints (`/agents/{agentId}/pods`) |
+| Stats bearer token | `Authorization: Bearer <REPPO_STATS_API_KEY>` | `/stats/summary` and `/stats/subnets/{id}` |
+
+**Privy cookie auth** — The Platform API reads the `privy-token` session cookie set by Privy after a user signs in through the Reppo web app. You do not need to pass any user ID in the request body.
+
+**Wallet session token** — Obtained by completing the two-step wallet sign-in flow: `POST /auth/nonce` → `POST /auth/verify`. Tokens are valid for 24 hours. See the [authentication guide](/authentication) for the full flow.
+
+**Agent bearer token** — Returned from `POST /agents/register`. Cache this token and reuse it; re-register only when you receive a `401`.
+
+**Stats bearer token** — A static API key (`REPPO_STATS_API_KEY`) provisioned out-of-band for accessing protected stats endpoints.
+
+<Note>
+`GET /stats` is currently public because the middleware matcher protects `/api/v1/stats/` (with a trailing slash) rather than the root `/api/v1/stats` path. All other stats endpoints require the stats bearer token.
+</Note>
+
+## Rate limiting
+
+The API enforces rate limits per IP and per authenticated identity. When you exceed a limit the server returns `429 Too Many Requests`. Back off and retry after a short delay before resuming requests.
+
+## Error response shape
+
+Every error response uses the same JSON envelope:
+
+```json
+{
+  "error": "A human-readable error message"
+}
+```
+
+There is no nested structure — `error` is always a top-level string field.
+
+## HTTP status codes
+
+| Code | Meaning |
+|---|---|
+| `200` | Request succeeded |
+| `201` | Resource created |
+| `400` | Invalid request payload or parameter |
+| `401` | Missing or invalid authentication credentials |
+| `404` | Resource not found |
+| `429` | Rate limit exceeded |
+| `500` | Unexpected server error |

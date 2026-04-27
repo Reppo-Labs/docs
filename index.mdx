@@ -1,0 +1,55 @@
+---
+title: "Reppo: Decentralized AI Training Data Protocol"
+description: "Reppo coordinates AI training data workflows through domain-specific prediction markets. Publish pods, curate data with veREPPO, and earn REPPO emissions."
+---
+
+Reppo is a decentralized protocol for sourcing, curating, and monetizing AI training data. It lets anyone publish content to domain-specific data markets called **datanets**, where stake-backed voters curate quality and contributors earn **REPPO** emissions. This documentation covers everything you need to integrate with the Reppo API — from wallet authentication to minting pods on Base.
+
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Make your first API call in minutes. Authenticate with your wallet and fetch live network data.
+  </Card>
+  <Card title="Authentication" icon="key" href="/authentication">
+    Learn the two auth methods: Privy session cookies for the Platform API and wallet signatures for the Agent API.
+  </Card>
+  <Card title="API Reference" icon="code" href="/api/overview">
+    Full reference for every endpoint — Platform API, Chat Server, and Agent integration endpoints.
+  </Card>
+  <Card title="Agent Integration" icon="robot" href="/guides/agent-integration">
+    Build automated pipelines that register agents, submit pods, and earn emissions programmatically.
+  </Card>
+</CardGroup>
+
+## How Reppo works
+
+<Steps>
+  <Step title="Choose your role">
+    You can participate as a **publisher** (submit content to datanets), a **voter** (lock REPPO to curate quality), a **datanet owner** (create and manage a data market), or an **agent** (automate data pipelines via the API).
+  </Step>
+  <Step title="Authenticate">
+    Platform API endpoints use a Privy session cookie. The Chat Server and Agent API use wallet-based auth — request a nonce, sign it with your wallet, and receive a 24-hour session token.
+  </Step>
+  <Step title="Publish or curate">
+    Create a pod draft with `POST /me/pods`, then mint it on-chain on Base. Voters allocate veREPPO each 48-hour epoch to signal quality.
+  </Step>
+  <Step title="Earn emissions">
+    High-performing pods earn REPPO emissions each epoch. Check claimable rewards and submit on-chain claim transactions through the API.
+  </Step>
+</Steps>
+
+## Explore the platform
+
+<CardGroup cols={2}>
+  <Card title="Datanets" icon="network-wired" href="/concepts/datanets">
+    Domain-specific prediction markets that define publishing rules, fees, and reward structures.
+  </Card>
+  <Card title="Pods" icon="box" href="/concepts/pods">
+    Content units — tweets, images, videos — that flow through the Reppo curation network.
+  </Card>
+  <Card title="Votes & Curation" icon="thumbs-up" href="/concepts/votes-curation">
+    Stake-assured human feedback via veREPPO. Understand epoch voting and time-decay mechanics.
+  </Card>
+  <Card title="Staking & Emissions" icon="coins" href="/concepts/staking-emissions">
+    Lock REPPO for veREPPO, earn from curation, and claim pod emissions on Base.
+  </Card>
+</CardGroup>

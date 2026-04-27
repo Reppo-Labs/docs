@@ -1,0 +1,60 @@
+---
+title: "Amplifi Staking API Endpoint"
+sidebarTitle: "Stakes"
+description: "Record Amplifi staking positions for a specific datanet on the Reppo platform after submitting and confirming the on-chain staking transaction on Base."
+---
+
+Amplifi staking is a mechanism that lets token holders direct additional yield to a specific datanet by staking REPPO alongside it. This differs from curation staking (veREPPO locking): curation staking locks REPPO to earn voting power across the protocol, while Amplifi staking targets a single datanet to amplify its reward pool and signal support for that datanet's ecosystem.
+
+After submitting the Amplifi stake transaction on Base, call this endpoint to record the position in the Reppo platform database.
+
+---
+
+## Create an Amplifi stake record
+
+<br />
+
+```
+POST /stakes/amplifi
+```
+
+Records an Amplifi staking position for the authenticated user. You must submit the on-chain staking transaction on Base before calling this endpoint and include the resulting transaction hash.
+
+**Auth:** Privy cookie
+
+### Request body
+
+<ParamField body="amount" type="string" required>
+  The amount staked, expressed as a decimal string (e.g., `"1000.5"`). Using a string preserves precision for large token amounts.
+</ParamField>
+
+<ParamField body="subnetId" type="string" required>
+  Internal ID of the datanet you are staking into.
+</ParamField>
+
+<ParamField body="txHash" type="string" required>
+  Transaction hash of the on-chain Amplifi stake transaction confirmed on Base.
+</ParamField>
+
+**Response `201`**
+
+```json
+{
+  "data": {
+    "id": "stake_abc123"
+  }
+}
+```
+
+### Example
+
+```bash
+curl -X POST https://reppo.ai/api/v1/stakes/amplifi \
+  -H "Cookie: privy-token=<your-privy-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": "500.0",
+    "subnetId": "subnet_abc123",
+    "txHash": "0x789def..."
+  }'
+```

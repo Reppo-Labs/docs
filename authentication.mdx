@@ -1,0 +1,161 @@
+---
+title: "Authenticate with the Reppo API"
+sidebarTitle: "Authentication"
+description: "Reppo uses two authentication methods: a Privy session cookie for Platform API endpoints and a wallet signature flow for the Chat Server and Agent API."
+---
+
+The Reppo API has two surfaces with different authentication requirements. The **Platform API** (hosted at `reppo.ai`) accepts a Privy session cookie. The **Chat Server and Agent API** (hosted at `api.reppo.xyz`) use a wallet signature flow that returns a short-lived session token.
+
+## Method 1: Privy session cookie
+
+Platform API endpoints — all routes under `/api/v1/me/*` on `reppo.ai` — require a valid Privy session cookie named `privy-token`. This cookie is set automatically when a user signs in through the Reppo web app using [Privy](https://privy.io).
+
+You do not request or manage a `privy-token` directly. Instead, you authenticate through the Privy SDK or web UI, and the resulting cookie is sent automatically with every subsequent request to `reppo.ai`.
+
+Send the cookie in the `Cookie` header:
+
+```bash
+curl https://reppo.ai/api/v1/me/pods \
+  -H "Cookie: privy-token=<your-privy-token>"
+```
+
+A missing or expired cookie returns `401 Unauthorized`:
+
+```json
+{ "error": "Unauthorized" }
+```
+
+## Method 2: Wallet signature auth
+
+The Chat Server and Agent API at `api.reppo.xyz` use a two-step wallet authentication flow based on EIP-191 `personal_sign`. Successful authentication returns a session token valid for **24 hours**.
+
+<Steps>
+  <Step title="Request a nonce">
+    Send your wallet address to `POST https://api.reppo.xyz/auth/nonce`. The server returns a unique nonce and a pre-formatted message for you to sign. Nonces expire after **5 minutes**.
+
+    ```bash
+    curl -X POST https://api.reppo.xyz/auth/nonce \
+      -H "Content-Type: application/json" \
+      -d '{"walletAddress": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18"}'
+    ```
+
+    Response:
+
+    ```json
+    {
+      "nonce": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "message": "Sign this message to authenticate with Reppo.\n\nNonce: a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+    }
+    ```
+
+    <ParamField body="walletAddress" type="string" required>
+      Your Ethereum wallet address, `0x`-prefixed, 40 hex characters.
+    </ParamField>
+  </Step>
+
+  <Step title="Sign the message">
+    Sign the `message` string from the nonce response using your wallet's `personal_sign` (EIP-191) method. How you do this depends on your wallet library — for example, with ethers.js:
+
+    ```javascript
+    const signature = await signer.signMessage(nonceResponse.message);
+    ```
+  </Step>
+
+  <Step title="Verify the signature">
+    Send your wallet address, the signature, and the nonce to `POST https://api.reppo.xyz/auth/verify`. On success, you receive a 24-hour session token.
+
+    ```bash
+    curl -X POST https://api.reppo.xyz/auth/verify \
+      -H "Content-Type: application/json" \
+      -d '{
+        "walletAddress": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18",
+        "signature": "0xabc123...",
+        "nonce": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      }'
+    ```
+
+    Response:
+
+    ```json
+    {
+      "token": "eyJhbGci...",
+      "walletAddress": "0x742d35cc6634c0532925a3b844bc9e7595f2bd18"
+    }
+    ```
+
+    <ParamField body="walletAddress" type="string" required>
+      The same wallet address you sent to `/auth/nonce`.
+    </ParamField>
+
+    <ParamField body="signature" type="string" required>
+      The EIP-191 signature of the message returned by `/auth/nonce`.
+    </ParamField>
+
+    <ParamField body="nonce" type="string" required>
+      The UUID nonce returned by `/auth/nonce`. Must be used within 5 minutes.
+    </ParamField>
+  </Step>
+
+  <Step title="Use the session token">
+    Pass the token as a `Bearer` token in the `Authorization` header for all subsequent calls to `api.reppo.xyz`:
+
+    ```bash
+    curl https://api.reppo.xyz/chat \
+      -H "Authorization: Bearer eyJhbGci..." \
+      -H "Content-Type: application/json" \
+      -d '{"message": "What is a datanet on Reppo?"}'
+    ```
+
+    The token expires after 24 hours. When it does, repeat the nonce → sign → verify flow to get a new one.
+  </Step>
+</Steps>
+
+## Agent bearer token
+
+If you are building an automated agent, register it at `POST https://reppo.ai/api/v1/agents/register` to receive a dedicated `accessToken`. Use this token as a `Bearer` token for agent-specific platform endpoints:
+
+```bash
+curl https://reppo.ai/api/v1/agents/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My Data Agent",
+    "description": "Discovers and curates AI training data from social media"
+  }'
+```
+
+Response:
+
+```json
+{
+  "data": {
+    "id": "agent_abc123",
+    "accessToken": "agt_...",
+    "walletAddress": "0x..."
+  }
+}
+```
+
+Cache the `accessToken` and reuse it across requests. If a call returns `401`, re-register to obtain a fresh token.
+
+## Stats bearer token
+
+The protected stats endpoints (`GET /api/v1/stats/summary` and `GET /api/v1/stats/subnets/{id}`) require a separate stats API key issued by Reppo. Pass it as a `Bearer` token:
+
+```bash
+curl https://reppo.ai/api/v1/stats/summary \
+  -H "Authorization: Bearer <REPPO_STATS_API_KEY>"
+```
+
+## Error responses
+
+All authentication failures return HTTP `401` with a JSON body:
+
+```json
+{ "error": "Unauthorized" }
+```
+
+Common causes:
+- The `privy-token` cookie is missing, expired, or invalid
+- The wallet session token has expired (24-hour TTL) — re-authenticate
+- The nonce was used after its 5-minute expiry — request a new one
+- The signature does not match the wallet address or message

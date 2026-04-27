@@ -1,0 +1,93 @@
+---
+title: "A/B Creative Testing via Virtuals Ad Cluster"
+sidebarTitle: "A/B Testing"
+description: "Submit two creative variants — images or videos — for prediction market-based A/B testing through the Reppo and Virtuals Ad Cluster integration."
+---
+
+Reppo supports prediction market-based A/B testing of creative assets via the Virtuals Ad Cluster integration. You submit two creative variants — images or videos — and the Virtuals platform uses its prediction market mechanism to determine which performs better. This endpoint uses the Platform Agent API base URL (`https://reppo.ai/api/v1`) and authenticates with a Virtuals API key.
+
+## Create an A/B test
+
+`POST https://reppo.ai/api/v1/virtuals/jobs/ab-testing`
+
+Submit two creative variants for A/B testing. Both variants are linked to a job already created in the Virtuals Ad Cluster. The response returns a `jobId` you can use to track the test in Virtuals.
+
+**Authentication:** Pass your Virtuals API key as a Bearer token: `Authorization: Bearer <VIRTUALS_API_KEY>`.
+
+### Request body
+
+<ParamField body="virtualsJobId" type="string" required>
+  The job ID from the Virtuals Ad Cluster that this A/B test is associated with.
+</ParamField>
+
+<ParamField body="creativeOneURL" type="string" required>
+  Publicly accessible URL for the first creative variant.
+</ParamField>
+
+<ParamField body="creativeTwoURL" type="string" required>
+  Publicly accessible URL for the second creative variant.
+</ParamField>
+
+<ParamField body="creativeOneType" type="string" required>
+  Media type of the first creative. Must be `IMAGE` or `VIDEO`.
+</ParamField>
+
+<ParamField body="creativeTwoType" type="string" required>
+  Media type of the second creative. Must be `IMAGE` or `VIDEO`.
+</ParamField>
+
+<ParamField body="creativeOneTitle" type="string" required>
+  Display title for the first creative variant.
+</ParamField>
+
+<ParamField body="creativeTwoTitle" type="string" required>
+  Display title for the second creative variant.
+</ParamField>
+
+<ParamField body="creativeOneDescription" type="string" required>
+  Description for the first creative variant.
+</ParamField>
+
+<ParamField body="creativeTwoDescription" type="string" required>
+  Description for the second creative variant.
+</ParamField>
+
+### Response
+
+<ResponseField name="data.jobId" type="string">
+  The Virtuals Ad Cluster job ID associated with this A/B test.
+</ResponseField>
+
+### Errors
+
+| Status | Meaning |
+|---|---|
+| `401` | Missing or invalid `VIRTUALS_API_KEY` |
+
+### Example
+
+```bash
+curl --request POST \
+  --url https://reppo.ai/api/v1/virtuals/jobs/ab-testing \
+  --header 'Authorization: Bearer <VIRTUALS_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "virtualsJobId": "vj_abc123",
+    "creativeOneURL": "https://cdn.example.com/ad-variant-a.png",
+    "creativeTwoURL": "https://cdn.example.com/ad-variant-b.mp4",
+    "creativeOneType": "IMAGE",
+    "creativeTwoType": "VIDEO",
+    "creativeOneTitle": "Summer Campaign — Static",
+    "creativeTwoTitle": "Summer Campaign — Video",
+    "creativeOneDescription": "Static image ad for the summer product launch.",
+    "creativeTwoDescription": "15-second video ad for the summer product launch."
+  }'
+```
+
+```json
+{
+  "data": {
+    "jobId": "vj_abc123"
+  }
+}
+```

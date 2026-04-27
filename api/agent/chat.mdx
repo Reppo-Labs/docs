@@ -1,0 +1,184 @@
+---
+title: "AI Chat API — Ask Questions About Reppo"
+sidebarTitle: "Chat"
+description: "Multi-turn AI chat assistant for navigating Reppo — supports general Q&A, guided datanet setup, pod minting, and emissions claim assistance."
+---
+
+The Chat endpoint provides an AI assistant that helps you navigate the Reppo protocol. It supports multi-turn conversations via a persistent session ID and automatically selects an operating mode based on the context of your message. All Chat endpoints use the Chat Server base URL (`https://api.reppo.xyz`) and require a wallet session token obtained from [wallet auth](/api/agent/auth).
+
+<Note>
+Chat mode is selected automatically based on your message content: `rag` for general protocol Q&A, `subnet-creation` for guided datanet setup, `minting` for the pod minting flow, and `emissions` for claims assistance. You do not need to specify a mode explicitly.
+</Note>
+
+## Send a message
+
+`POST https://api.reppo.xyz/chat`
+
+Send a message and receive an AI-generated response. Omit `sessionId` to start a new conversation. The response includes the `sessionId` you should pass on follow-up turns.
+
+### Request body
+
+<ParamField body="message" type="string" required>
+  Your message to the AI assistant. Maximum 4000 characters.
+</ParamField>
+
+<ParamField body="sessionId" type="string">
+  UUID of an existing session. Omit this field to start a new conversation — the response will return a fresh `sessionId` to use on subsequent turns.
+</ParamField>
+
+### Response
+
+<ResponseField name="sessionId" type="string">
+  UUID identifying this conversation session. Pass this on subsequent requests to continue the conversation.
+</ResponseField>
+
+<ResponseField name="response" type="string">
+  The AI-generated response. May include Markdown formatting.
+</ResponseField>
+
+<ResponseField name="sources" type="array">
+  RAG documentation sources used to generate the response.
+
+  <Expandable title="source object properties">
+    <ResponseField name="source" type="string">
+      Source identifier or URL.
+    </ResponseField>
+    <ResponseField name="title" type="string">
+      Title of the referenced document.
+    </ResponseField>
+    <ResponseField name="section" type="string">
+      Section within the document.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="mode" type="string">
+  The operating mode selected for this response. One of `rag`, `subnet-creation`, `minting`, or `emissions`.
+</ResponseField>
+
+### Errors
+
+| Status | Meaning |
+|---|---|
+| `400` | Missing or invalid `message` field |
+| `401` | Missing or expired session token |
+| `429` | Rate limit exceeded |
+
+### Examples
+
+<CodeGroup>
+
+```bash Start a new conversation
+curl --request POST \
+  --url https://api.reppo.xyz/chat \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "message": "What is a datanet on Reppo?"
+  }'
+```
+
+```bash Continue an existing conversation
+curl --request POST \
+  --url https://api.reppo.xyz/chat \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "message": "How do I publish a pod to that datanet?",
+    "sessionId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+  }'
+```
+
+</CodeGroup>
+
+```json
+{
+  "sessionId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "response": "A **datanet** on Reppo is a curated data collection organized around a specific topic or domain...",
+  "sources": [
+    {
+      "source": "docs/concepts/datanets",
+      "title": "Datanets",
+      "section": "Overview"
+    }
+  ],
+  "mode": "rag"
+}
+```
+
+## Get session history
+
+`GET https://api.reppo.xyz/chat/{sessionId}/history`
+
+Retrieve the full message history for a conversation session. Only the wallet that created the session can access its history. Sessions expire after **30 days**.
+
+### Path parameters
+
+<ParamField path="sessionId" type="string" required>
+  UUID of the conversation session to retrieve.
+</ParamField>
+
+### Response
+
+<ResponseField name="sessionId" type="string">
+  UUID of the conversation session.
+</ResponseField>
+
+<ResponseField name="messages" type="array">
+  Ordered list of messages in the conversation.
+
+  <Expandable title="message object properties">
+    <ResponseField name="role" type="string">
+      Who sent the message. Either `user` or `assistant`.
+    </ResponseField>
+    <ResponseField name="content" type="string">
+      The message text.
+    </ResponseField>
+    <ResponseField name="timestamp" type="string">
+      ISO 8601 datetime when the message was sent.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO 8601 datetime when the session was created.
+</ResponseField>
+
+<ResponseField name="updatedAt" type="string">
+  ISO 8601 datetime of the most recent message.
+</ResponseField>
+
+### Errors
+
+| Status | Meaning |
+|---|---|
+| `401` | Missing or expired session token |
+| `404` | Session not found or expired (sessions expire after 30 days) |
+
+### Example
+
+```bash
+curl --request GET \
+  --url https://api.reppo.xyz/chat/a1b2c3d4-e5f6-7890-abcd-ef1234567890/history \
+  --header 'Authorization: Bearer <token>'
+```
+
+```json
+{
+  "sessionId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "messages": [
+    {
+      "role": "user",
+      "content": "What is a datanet on Reppo?",
+      "timestamp": "2025-01-15T10:30:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "A **datanet** on Reppo is a curated data collection...",
+      "timestamp": "2025-01-15T10:30:02Z"
+    }
+  ],
+  "createdAt": "2025-01-15T10:30:00Z",
+  "updatedAt": "2025-01-15T10:30:02Z"
+}
+```

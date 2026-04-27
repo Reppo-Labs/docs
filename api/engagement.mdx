@@ -1,0 +1,252 @@
+---
+title: "Pod Engagement API — Votes, Comments, Feedback"
+sidebarTitle: "Engagement"
+description: "Register on-chain veREPPO votes, post written comments, and store qualitative vote feedback for pods — all authenticated with your Privy session cookie."
+---
+
+The engagement endpoints let users interact with pods in three ways: commenting for discussion, voting to influence curation rewards, and submitting qualitative feedback alongside a vote. All engagement endpoints require Privy cookie authentication. Votes are on-chain actions on Base — you must submit the transaction first and pass the resulting hash to the API.
+
+---
+
+## List comments for a pod
+
+<br />
+
+```
+GET /pods/{podId}/comments
+```
+
+Returns all comments posted on a pod, ordered by creation time.
+
+**Auth:** Privy cookie
+
+### Path parameters
+
+<ParamField path="podId" type="string" required>
+  The internal ID of the pod.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": {
+    "comments": [
+      {
+        "id": "comment_001",
+        "comment": "Great summary of the paper.",
+        "createdAt": "2025-04-01T10:30:00Z",
+        "userName": "alice",
+        "thumbnailURL": "https://example.com/avatar.png"
+      }
+    ]
+  }
+}
+```
+
+### Example
+
+```bash
+curl https://reppo.ai/api/v1/pods/pod_xyz789/comments \
+  -H "Cookie: privy-token=<your-privy-token>"
+```
+
+---
+
+## Create a comment on a pod
+
+<br />
+
+```
+POST /pods/{podId}/comments
+```
+
+Posts a new comment on a pod. Returns the internal ID of the created comment.
+
+**Auth:** Privy cookie
+
+### Path parameters
+
+<ParamField path="podId" type="string" required>
+  The internal ID of the pod.
+</ParamField>
+
+### Request body
+
+<ParamField body="podId" type="string" required>
+  The internal ID of the pod (must match the path parameter).
+</ParamField>
+
+<ParamField body="comment" type="string" required>
+  The comment text.
+</ParamField>
+
+**Response `201`**
+
+```json
+{
+  "data": {
+    "id": "comment_002"
+  }
+}
+```
+
+### Example
+
+```bash
+curl -X POST https://reppo.ai/api/v1/pods/pod_xyz789/comments \
+  -H "Cookie: privy-token=<your-privy-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "podId": "pod_xyz789",
+    "comment": "This is a well-curated summary — very useful for the datanet."
+  }'
+```
+
+---
+
+## Register a vote for a pod
+
+<br />
+
+```
+POST /pods/{podId}/votes
+```
+
+Records a vote for a pod after the corresponding on-chain transaction has been confirmed on Base. Votes affect the pod's curation score for the given epoch and determine reward distribution.
+
+<Warning>
+You must submit the vote transaction on Base before calling this endpoint. Passing an invalid or unconfirmed `txHash` will result in a `400` error.
+</Warning>
+
+**Auth:** Privy cookie
+
+### Path parameters
+
+<ParamField path="podId" type="string" required>
+  The internal ID of the pod being voted on.
+</ParamField>
+
+### Request body
+
+<ParamField body="podId" type="string" required>
+  The internal ID of the pod (must match the path parameter).
+</ParamField>
+
+<ParamField body="epoch" type="integer" required>
+  The epoch number in which this vote is being cast.
+</ParamField>
+
+<ParamField body="votes" type="number" required>
+  The weighted vote amount, derived from the voter's veREPPO balance.
+</ParamField>
+
+<ParamField body="upVote" type="boolean" required>
+  `true` for an up-vote, `false` for a down-vote.
+</ParamField>
+
+<ParamField body="txHash" type="string" required>
+  Transaction hash of the on-chain vote submitted on Base.
+</ParamField>
+
+**Response `200`**
+
+```json
+{
+  "data": {
+    "id": "vote_abc456"
+  }
+}
+```
+
+### Example
+
+```bash
+curl -X POST https://reppo.ai/api/v1/pods/pod_xyz789/votes \
+  -H "Cookie: privy-token=<your-privy-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "podId": "pod_xyz789",
+    "epoch": 42,
+    "votes": 250.5,
+    "upVote": true,
+    "txHash": "0xdef456..."
+  }'
+```
+
+---
+
+## Store vote feedback for a pod
+
+<br />
+
+```
+POST /feedback/pods/{id}
+```
+
+Stores qualitative written feedback alongside a vote. Use this to capture the voter's reasoning — the feedback is linked to the specific vote context (epoch, voting power, and direction).
+
+**Auth:** Privy cookie
+
+### Path parameters
+
+<ParamField path="id" type="string" required>
+  The internal ID of the pod.
+</ParamField>
+
+### Request body
+
+<ParamField body="podId" type="string" required>
+  The internal ID of the pod.
+</ParamField>
+
+<ParamField body="feedback" type="string" required>
+  The voter's written rationale or qualitative assessment.
+</ParamField>
+
+<ParamField body="epoch" type="integer" required>
+  The epoch number in which the vote was cast.
+</ParamField>
+
+<ParamField body="votingPower" type="number" required>
+  The voter's veREPPO voting power at the time of the vote.
+</ParamField>
+
+<ParamField body="upVote" type="boolean" required>
+  `true` if the associated vote was an up-vote, `false` for a down-vote.
+</ParamField>
+
+<ParamField body="privateSubnetId" type="string" required>
+  Internal ID of the datanet the pod belongs to.
+</ParamField>
+
+<ParamField body="votes" type="number" required>
+  The weighted vote amount associated with this feedback entry.
+</ParamField>
+
+**Response `201`**
+
+```json
+{
+  "data": {
+    "id": "feedback_789"
+  }
+}
+```
+
+### Example
+
+```bash
+curl -X POST https://reppo.ai/api/v1/feedback/pods/pod_xyz789 \
+  -H "Cookie: privy-token=<your-privy-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "podId": "pod_xyz789",
+    "feedback": "The summary is accurate and well-structured, covering the key contributions clearly.",
+    "epoch": 42,
+    "votingPower": 1500.0,
+    "upVote": true,
+    "privateSubnetId": "subnet_abc123",
+    "votes": 250.5
+  }'
+```

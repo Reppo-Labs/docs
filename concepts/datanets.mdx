@@ -1,0 +1,83 @@
+---
+title: "What is a Datanet on Reppo?"
+sidebarTitle: "Datanets"
+description: "Datanets are domain-specific data markets on Reppo where publishers submit content, stake-backed voters curate it, and rewards flow to top performers."
+---
+
+A datanet (also called a subnet) is the core organizational primitive of the Reppo protocol. Each datanet is a domain-specific market for sourcing, curating, and monetizing AI training data — think of it as a self-contained data economy with its own rules, fees, and incentives. Anyone can launch a datanet for any data domain without permission.
+
+## What datanet owners control
+
+When you create a datanet, you configure all of its economic and governance parameters:
+
+| Setting | Description |
+|---|---|
+| **Access governance** | Who can publish content and who can vote |
+| **Publishing fee** | Cost in REPPO to submit a pod to this datanet |
+| **Quality thresholds** | Minimum standards content must meet for acceptance |
+| **Reward mechanics** | How emissions flow to contributors and curators |
+| **Native token** | The ERC-20 token on Base associated with this datanet |
+
+## How content flows through a datanet
+
+<Steps>
+  <Step title="Publisher pays the fee">
+    A publisher selects a datanet and pays its publishing fee in REPPO. This fee is the Sybil-resistance mechanism — submitting low-quality content at scale is economically costly.
+  </Step>
+  <Step title="Pod becomes visible">
+    The submitted content (a pod) is made visible to all voters participating in that datanet.
+  </Step>
+  <Step title="Voters allocate veREPPO">
+    During the current 48-hour epoch, voters distribute their veREPPO voting power toward or against the pod.
+  </Step>
+  <Step title="Epoch closes and rewards are calculated">
+    At the end of the epoch, the network tallies votes and calculates reward distribution based on voting outcomes.
+  </Step>
+  <Step title="Emissions flow to quality content">
+    High-quality pods that earn strong positive curation generate sustained emissions each epoch. Weak content is downranked and earns less.
+  </Step>
+</Steps>
+
+## Datanet economics
+
+Publishing fees and other revenue accumulate in the **Performance Pool** for that datanet:
+
+| Source | Contribution to pool |
+|---|---|
+| Datanet creation fees | 50% |
+| Publishing fees | 10% |
+| Data access fees | 10% |
+
+The Performance Pool distributes every third epoch. When it distributes:
+
+- **80%** goes to REPPO stakers
+- **20%** goes to datanet owners
+
+Distribution across datanets is weighted by four metrics:
+
+| Metric | Weight |
+|---|---|
+| EVOF (epoch-weighted output factor) | 40% |
+| Staked REPPO | 25% |
+| Trading volume | 20% |
+| Total fees collected | 15% |
+
+<Note>
+  The Performance Pool distributes on a fixed cadence — every third epoch. Rewards you earn between distributions accrue and pay out at the next distribution event.
+</Note>
+
+## Creating a datanet
+
+Use the `POST /me/subnets` endpoint to create a datanet draft programmatically. You will need to provide:
+
+- Native token address (an ERC-20 contract on Base)
+- Token symbol and decimals
+- Subnet name and description
+- Publisher and voter onboarding instructions
+- Your initial fee structure
+
+```bash
+POST /api/v1/me/subnets
+```
+
+After creating the draft, publish it on-chain using `POST /me/subnets/{id}/publish` with the transaction hash. You can update fees at any time via the fee management endpoints.

@@ -1,0 +1,77 @@
+---
+title: "What is a Pod? Content on the Reppo Network"
+sidebarTitle: "Pods"
+description: "Pods are the atomic content units on Reppo — tweets, images, videos, annotations, and more — that publishers submit to datanets for curation."
+---
+
+A pod is a unit of content submitted to a datanet. It can be a tweet, image, video, piece of writing, annotation, or any other media the datanet accepts. Pods are the atomic data units that flow through the Reppo curation network — everything voters evaluate, everything that earns emissions, and everything that AI teams ultimately access as training data is organized around pods.
+
+## Pay-to-publish and Sybil resistance
+
+Publishing a pod uses a **pay-to-publish** mechanism. Before your content becomes visible to voters, you pay the datanet's publishing fee in REPPO. This upfront cost is intentional: it makes submitting spam or low-quality content economically costly at scale, creating meaningful Sybil resistance without requiring identity verification.
+
+The fee goes into the datanet's Performance Pool, where it is redistributed to stakers and datanet owners every third epoch.
+
+## Publishing flow
+
+<Steps>
+  <Step title="Pay the publishing fee">
+    Send the datanet's required REPPO publishing fee. The amount is set by the datanet owner and visible in the datanet's configuration.
+  </Step>
+  <Step title="Pod becomes visible to voters">
+    Once the fee transaction is confirmed, your pod is listed in the datanet and available for voters to evaluate during the current epoch.
+  </Step>
+  <Step title="Voters allocate veREPPO">
+    During the 48-hour epoch window, voters cast for or against votes using their veREPPO. Earlier votes carry more weight due to time decay.
+  </Step>
+  <Step title="Emissions are calculated">
+    At epoch end, the network calculates your pod's share of emissions based on its net voting performance. High-quality pods earn more; weak pods earn less or nothing.
+  </Step>
+</Steps>
+
+## Minting a pod as an NFT
+
+Tweets can be minted as on-chain NFTs on Base through the `POST /pods/mint` endpoint on the Chat Server (`https://api.reppo.xyz`). The minting process runs automatically:
+
+1. The server fetches the tweet from X/Twitter
+2. AI runs slop detection to filter AI-generated content (unless `skipSlopCheck: true`)
+3. Metadata is generated and the NFT is minted via the `PodManager` contract
+4. Pod metadata is submitted to the Reppo platform for indexing and display
+
+The `PodManager` contract address on Base (chain ID 8453) is `0xcfF0511089D0Fbe92E1788E4aFFF3E7930b3D47c`.
+
+Once minted, your pod NFT lives in your wallet on Base, generates REPPO emissions each epoch, and can be listed and traded.
+
+<Warning>
+  The `skipSlopCheck` flag bypasses AI-content detection. Use this only when you are certain the content is human-generated — submitting AI-generated content may result in a ban.
+</Warning>
+
+## Pod engagement types
+
+Pods support three forms of engagement:
+
+| Type | Endpoint | Description |
+|---|---|---|
+| **Votes** | `POST /pods/{podId}/votes` | veREPPO-backed quality signal, for or against |
+| **Comments** | `POST /pods/{podId}/comments` | Written qualitative feedback |
+| **Vote feedback** | `POST /feedback/pods/{id}` | Structured written feedback attached to a vote |
+
+All engagement endpoints require Privy cookie authentication.
+
+## Claiming emissions
+
+Each pod earns REPPO emissions epoch by epoch based on its curation performance. Use these Chat Server endpoints to check and claim:
+
+```bash
+# Check claimable emissions for a pod
+GET https://api.reppo.xyz/pods/{podId}/emissions
+
+# Execute on-chain claim for pending epochs
+POST https://api.reppo.xyz/pods/{podId}/emissions/claim
+```
+
+Both endpoints require a wallet session token obtained through the `POST /auth/nonce` → `POST /auth/verify` authentication flow. Claims settle on-chain via `PodManager` on Base. Each request scans and claims up to 50 epochs at a time.
+
+<Tip>
+  Call `GET /pods/{podId}/emissions` first to see per-epoch breakdowns and your total claimable REPPO before executing the claim transaction.
+</Tip>
