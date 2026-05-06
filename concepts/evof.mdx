@@ -1,0 +1,117 @@
+---
+title: "EVOF — Economic Value of Feedback"
+sidebarTitle: "EVOF"
+description: "EVOF is Reppo's proprietary metric for measuring how much economically-backed conviction exists behind a dataset's curation at any given moment."
+---
+
+**EVOF (Economic Value of Feedback)** is a proprietary metric developed by Reppo that answers one of the most important — and most overlooked — questions in data: not how much feedback exists, but how much that feedback is actually worth.
+
+Instead of counting votes, EVOF answers:
+
+> *"How much stake-weighted, time-committed belief supports this dataset right now?"*
+
+## The problem EVOF solves
+
+Most data systems measure activity: labels submitted, participants, agreements. What they cannot tell you is whether any of that feedback was genuine — whether the people providing it had real conviction or were completing a task for a payout, and whether consensus was broad and independent or dominated by a handful of actors.
+
+This failure mode is invisible until it's too late. A model trained on feedback that *looks* credible but isn't will behave unpredictably — or worse, confidently wrong — in the real world. **Bad data quality doesn't announce itself. It hides.**
+
+The core insight EVOF is built on:
+
+> *How expensive would it be to fake the consensus you're seeing?*
+
+A high EVOF score means the conviction behind those votes is backed by locked capital, committed over time, spread across enough independent participants that manufacturing it would be prohibitively costly. Volume and participation counts can be gamed. EVOF cannot — because it is rooted in locked capital and genuine participation breadth.
+
+## The formula
+
+EVOF is defined as:
+
+```
+EVOF = W²
+```
+
+where:
+
+```
+W = log(N) × (Σᵢ √(VPᵢ) · votesᵢ) / V
+```
+
+| Symbol | Meaning |
+|---|---|
+| `VPᵢ` | Voting power of user *i* — derived from staked REPPO and lock duration |
+| `votesᵢ` | Total votes cast by user *i* in the epoch |
+| `V` | Total number of votes in the epoch |
+| `N` | Number of unique voters in the epoch |
+
+## Why each term in the formula is there
+
+**`√(VPᵢ)` — square-root of voting power**
+
+Voting power scales with how much a participant has locked and for how long. But raw voting power grows linearly with capital, which would allow large stakeholders to dominate the signal entirely. The square-root transformation preserves the ordering — more stake still means more influence — while introducing diminishing returns. A holder with 100× the capital earns 10× the influence, not 100×. This protects the metric from whale manipulation while still rewarding genuine economic commitment.
+
+**`votesᵢ / V` — each user's share of total votes**
+
+Weighting by vote share rather than raw vote counts normalises for epoch-level activity differences and ensures the formula captures *conviction per unit of feedback* rather than absolute volume. A small group of deeply convicted participants can produce a high EVOF even if total vote count is modest — what matters is the economic weight behind each vote.
+
+**`log(N)` — logarithm of unique voter count**
+
+A dataset evaluated by 4,000 independent participants is more trustworthy than one evaluated by 40, even at equal total capital. The logarithmic scaling rewards participation breadth but with diminishing returns — going from 10 to 100 voters is more meaningful than going from 10,000 to 10,090. This makes thin or concentrated participation visible and penalised, without allowing raw headcount to swamp the economic signal.
+
+**`W²` — squaring the intermediate value**
+
+Squaring `W` amplifies differences in the conviction signal — high-conviction datasets stand out clearly from mediocre ones — while preserving the non-negativity of the score. The final EVOF value can be read as a measure of *average economically credible conviction per unit of feedback*, making it comparable across datanets of different sizes and ages.
+
+## Voting power timing
+
+Voting power is computed as a **snapshot at the epoch boundary**.
+
+- All votes within an epoch use the same `VPᵢ` for a given user
+- VP does not depend on when within the epoch the vote was cast
+- This eliminates timing games and ensures consistent signal weighting across the full epoch window
+
+## Epoch EVOF vs. Cumulative EVOF
+
+Two versions of the score are tracked for every Datanet:
+
+| Version | Description |
+|---|---|
+| **Epoch EVOF** | Current snapshot, recalculated every 48 hours |
+| **Cumulative EVOF** | Historical total — how conviction has built across all epochs |
+
+A Datanet with an epoch EVOF of 42 and a cumulative EVOF of 1,284 has meaningful conviction behind its current dataset and has been building credibility consistently over many cycles — not just spiking once and fading.
+
+## EVOF as a qualitative benchmarking tool
+
+Because EVOF is computed on the same formula for every Datanet every 48 hours, it enables **direct, cross-datanet comparison of data quality** — something that was previously impossible without domain-specific evaluation.
+
+**For Datanet owners:** EVOF is your quality dashboard. When epoch EVOF grows consistently and cumulative score builds, your dataset is maturing into something trustworthy. When it drops or plateaus against the network average, investigate — are participation rates declining? Is conviction thinning?
+
+**For data consumers:** Before subscribing to a Datanet's output for AI training, fine-tuning, or agent development, check its EVOF trajectory against the network benchmark. A high, growing cumulative EVOF provides a much stronger quality guarantee than raw dataset size alone. Two datanets with the same number of labels can have radically different EVOF scores — which is precisely the signal you need to evaluate.
+
+**For the protocol:** EVOF creates a public, real-time ranking of credibility across all Datanets — directing capital and attention toward the most trustworthy data markets and creating healthy competition to maintain genuine participation.
+
+## How EVOF shapes emissions
+
+EVOF carries **40% weight** in the Performance Pool distribution formula — the single largest factor in how rewards are allocated across Datanets every third epoch. Datanets that maintain deep, broad, and consistent economic conviction are directly rewarded. Datanets with thin or manufactured curation receive proportionally less.
+
+| Metric | Weight |
+|---|---|
+| **EVOF** | **40%** |
+| Staked REPPO | 25% |
+| Trading volume | 20% |
+| Total fees collected | 15% |
+
+This design creates a direct alignment between data quality and economic outcome: the best-curated datasets attract more capital, which raises their EVOF, which earns more emissions, which attracts more participants — a compounding credibility flywheel.
+
+## Summary: old questions vs. EVOF
+
+| The old question | What EVOF asks instead |
+|---|---|
+| How much feedback was submitted? | How much was that feedback actually worth? |
+| How many people participated? | How committed and independent were they? |
+| Is there consensus? | How expensive would it be to fake that consensus? |
+| Is my dataset large? | Is my dataset credible — now, and over time? |
+
+<Note>
+  EVOF is computed per Datanet every 48 hours. Voting power is snapshotted at the epoch boundary, so all votes within an epoch carry consistent weight for a given user regardless of when they were cast.
+</Note>
