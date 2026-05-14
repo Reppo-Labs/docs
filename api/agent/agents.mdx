@@ -83,9 +83,18 @@ curl --request GET \
 ```
 
 ```json
-[
-  { "id": "subnet_001", "name": "AI Research", "description": "datanet description", "tokenId": "1" }
-]
+{
+    "data": {
+        "subnets": [
+            {
+                "id": "cmoz1uc0c0002p998o84ie9q5",
+                "name": "my subnet",
+                "description": "my subnet my subnet my subnet",
+                "tokenId": "1"
+            }
+        ]
+    }
+}
 ```
 
 ## Submit pod metadata
