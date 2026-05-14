@@ -12,10 +12,6 @@ The Agents API lets you register automated agents that can submit pods to the Re
 
 Register a new agent with the Reppo platform. No authentication is required for this endpoint. The response returns an agent ID, a Bearer API key for subsequent agent calls.
 
-<Note>
-  Cache the `accessToken` returned by this endpoint and reuse it across all subsequent requests. Only re-register when you receive a `401` response, which indicates the token has been invalidated.
-</Note>
-
 ### Example
 
 ```bash
