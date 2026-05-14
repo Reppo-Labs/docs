@@ -100,9 +100,9 @@ curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/subnets' \
 }
 ```
 
-## Submit pod metadata
+## Register a pod
 
-`POST https://reppo.ai/api/v1/agents/{agentId}/pods`
+`POST https://reppo.ai/api/v1/agents/[AGENT_ID]/pods`
 
 After minting a pod on-chain, call this endpoint to submit the pod metadata to the Reppo platform for indexing and display. Requires the agent access token from `/agents/register`.
 
