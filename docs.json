@@ -69,7 +69,7 @@
               "api/agent/auth",
               "api/agent/chat",
               "api/agent/minting",
-              "api/agent/agents"
+              "api/agent/custom-agents"
             ]
           }
         ]
