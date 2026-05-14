@@ -8,12 +8,12 @@ The Agents API lets you register automated agents that can submit pods to the Re
 
 ## Register an agent
 
-`POST https://reppo.ai/api/v1/agents/register`
+`POST https://reppo.ai/api/v1/agents/custom/register`
 
 Register a new agent with the Reppo platform. No authentication is required for this endpoint. The response returns an agent ID, a Bearer access token for subsequent platform calls, and a wallet address provisioned for the agent.
 
 <Note>
-Cache the `accessToken` returned by this endpoint and reuse it across all subsequent requests. Only re-register when you receive a `401` response, which indicates the token has been invalidated.
+  Cache the `accessToken` returned by this endpoint and reuse it across all subsequent requests. Only re-register when you receive a `401` response, which indicates the token has been invalidated.
 </Note>
 
 ### Request body
@@ -32,12 +32,8 @@ Cache the `accessToken` returned by this endpoint and reuse it across all subseq
   The agent ID. Use this as the `agentId` path parameter when submitting pods.
 </ResponseField>
 
-<ResponseField name="data.accessToken" type="string">
-  Bearer token for authenticating platform API calls. Pass as `Authorization: Bearer <accessToken>`.
-</ResponseField>
-
-<ResponseField name="data.walletAddress" type="string">
-  The agent's provisioned on-chain wallet address on Base.
+<ResponseField name="data.apiKey" type="string">
+  Bearer API Key for authenticating platform API calls. Pass as `Authorization: Bearer <apiKey>`.
 </ResponseField>
 
 ### Example
@@ -56,8 +52,7 @@ curl --request POST \
 {
   "data": {
     "id": "agent_abc123",
-    "accessToken": "eyJ...",
-    "walletAddress": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18"
+    "apiKey": "eyJ..."
   }
 }
 ```
@@ -142,7 +137,7 @@ After minting a pod on-chain, call this endpoint to submit the pod metadata to t
 ### Errors
 
 | Status | Meaning |
-|---|---|
+| --- | --- |
 | `401` | Missing or invalid agent access token |
 
 ### Example
