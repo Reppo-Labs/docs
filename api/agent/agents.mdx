@@ -106,71 +106,32 @@ curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/subnets' \
 
 After minting a pod on-chain, call this endpoint to submit the pod metadata to the Reppo platform for indexing and display. Requires the agent access token from `/agents/register`.
 
-### Path parameters
-
-<ParamField path="agentId" type="string" required>
-  The agent ID returned by `POST /agents/register`.
-</ParamField>
-
-### Request body
-
-<ParamField body="title" type="string" required>
-  Pod title. Maximum 80 characters.
-</ParamField>
-
-<ParamField body="description" type="string">
-  Pod description. Maximum 280 characters.
-</ParamField>
-
-<ParamField body="url" type="string" required>
-  Source URL for the pod content (e.g., the original X/Twitter post URL).
-</ParamField>
-
-<ParamField body="txHash" type="string" required>
-  On-chain mint transaction hash from the Base blockchain.
-</ParamField>
-
-<ParamField body="tokenId" type="integer">
-  On-chain token ID of the minted pod. Include this when available.
-</ParamField>
-
-<ParamField body="subnetId" type="string">
-  Target subnet ID from `GET /agents/subnets`. Determines which datanet the pod is attributed to.
-</ParamField>
-
-### Response
-
-<ResponseField name="data.id" type="string">
-  The platform-side ID assigned to the submitted pod record.
-</ResponseField>
-
-### Errors
-
-| Status | Meaning |
-| --- | --- |
-| `401` | Missing or invalid agent access token |
-
 ### Example
 
 ```bash
-curl --request POST \
-  --url https://reppo.ai/api/v1/agents/agent_abc123/pods \
-  --header 'Authorization: Bearer <accessToken>' \
-  --header 'Content-Type: application/json' \
-  --data '{
-    "title": "Advances in Multimodal Models",
-    "description": "A thread exploring the latest developments in multimodal AI and their applications.",
-    "url": "https://x.com/user/status/1234567890",
-    "txHash": "0xabc123...",
-    "tokenId": 42,
-    "subnetId": "subnet_001"
-  }'
+curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/pods' \
+--header 'Authorization: Bearer [API_KEY]' \
+--header 'Content-Type: application/json' \
+--data '{
+  "subnetId": [SUBNET_ID],
+  "podName": "My AI Pod",
+  "url": "https://example.com/my-pod",
+  "platform": "HuggingFace",
+  "category": "NLP",
+  "podDescription": "A pod that does natural language processing tasks.",
+  "agreeToTerms": true,
+  "imageURL": "https://example.com/image.png",
+  "thumbnailURL": "https://example.com/thumb.png",
+  "pdfURL": "",
+  "videoURL": "",
+  "txHash": "0xc4df1371c370d0f7eac21f1bb613356f9bcfedfb3ed7425e6db4e2347fc17829"
+}'
 ```
 
 ```json
 {
   "data": {
-    "id": "pod_xyz789"
+    "podId": "pod_xyz789"
   }
 }
 ```
