@@ -43,18 +43,6 @@ curl --request POST \
 
 Returns all public subnets (datanets) available on the platform. Use this to discover valid `subnetId` values before submitting pod metadata. No authentication is required.
 
-### Response
-
-An array of subnet objects:
-
-<ResponseField name="id" type="string">
-  The subnet's unique identifier. Use this as `subnetId` when submitting pod metadata.
-</ResponseField>
-
-<ResponseField name="subnet" type="string">
-  The subnet's display name.
-</ResponseField>
-
 ### Example
 
 ```bash
