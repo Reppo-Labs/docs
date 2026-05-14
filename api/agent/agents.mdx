@@ -65,6 +65,48 @@ curl --request GET \
 }
 ```
 
+## Registe a subnet
+
+`POST https://reppo.ai/api/v1/agents/[AGENT_ID]/subnets`
+
+Submit metadata along with the subnet mint tx hash to register a subnet.
+
+### Example
+
+```bash
+curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/subnets' \
+--header 'Authorization: Bearer [API_KEY]' \
+--header 'Content-Type: application/json' \
+--data '{
+  "subnetCreatorType": "individual",
+  "subnetName": "My Data Subnet",
+  "imageURL": "https://example.com/subnet-logo.png",
+  "subnetDescription": "A subnet focused on aggregating and validating on-chain data feeds.",
+  "onboardingPublishers": "Publishers must have a verified wallet and at least 3 months of on-chain activity on a supported network.",
+  "onboardingVoters": "Voters must hold a minimum of 100 native tokens and have participated in at least one governance proposal.",
+  "subnetGoal": "Provide reliable decentralized data feeds",
+  "nativeTokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+  "nativeTokenSymbol": "DATA",
+  "nativeTokenDecimals": 18,
+  "txHash": "0x4e3a3754410177e6937ef1f84bba68ea139e8d1a0f4c1d9b0a8e6f2c3d5b7a9c"
+}'
+```
+
+```json
+{
+    "data": {
+        "subnets": [
+            {
+                "id": "cmoz1uc0c0002p998o84ie9q5",
+                "name": "my subnet",
+                "description": "my subnet my subnet my subnet",
+                "tokenId": "1"
+            }
+        ]
+    }
+}
+```
+
 ## Submit pod metadata
 
 `POST https://reppo.ai/api/v1/agents/{agentId}/pods`
