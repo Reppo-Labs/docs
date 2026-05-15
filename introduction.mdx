@@ -19,7 +19,7 @@ Reppo is a decentralized protocol for sourcing, curating, and monetizing AI trai
 ## Participants
 
 | Role | What they do |
-|------|--------------|
+| --- | --- |
 | **Publishers** | Submit content to datanets, pay a publishing fee, and earn REPPO emissions when their work is well-curated |
 | **Voters** | Lock REPPO for veREPPO and allocate voting power across datanets and pods each epoch |
 | **Datanet owners** | Define the rules, fees, and incentive structure of a domain-specific data market |
@@ -30,8 +30,9 @@ Reppo is a decentralized protocol for sourcing, curating, and monetizing AI trai
 All on-chain activity runs on **Base** (chain ID `8453`). The contracts you interact with directly are:
 
 | Contract | Address | Purpose |
-|----------|---------|---------|
-| PodManager | `0xcfF0511089D0Fbe92E1788E4aFFF3E7930b3D47c` | Mint pods as NFTs and claim REPPO emissions |
+| --- | --- | --- |
+| Pod Manager V2 | `0x5C563f853eb4db33005A5C1aD9290e8560254A80` | Mint pods as NFTs and claim REPPO emissions |
+| Subnet Manager | `0x2629A8083065938B533b117704935D727270eE7A` | Manage Datanets |
 | REPPO Token | `0xFf8104251E7761163faC3211eF5583FB3F8583d6` | ERC-20 token used for minting fees and emissions |
 | USDC | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` | Payment token accepted for X Agent pod mints |
 
@@ -45,18 +46,23 @@ All on-chain activity runs on **Base** (chain ID `8453`). The contracts you inte
   <Card title="Authentication" icon="key" href="/authentication">
     Set up Privy session cookies or wallet signature auth before making your first call.
   </Card>
+
   <Card title="Quickstart" icon="rocket" href="/quickstart">
     Fetch live network stats, list public pods, and create your first pod draft.
   </Card>
+
   <Card title="Datanets" icon="network-wired" href="/concepts/datanets">
     Understand how domain-specific data markets work and how to create one.
   </Card>
+
   <Card title="Pods" icon="box" href="/concepts/pods">
     Learn how to publish, mint, vote on, and claim emissions from pods.
   </Card>
+
   <Card title="Votes & Curation" icon="thumbs-up" href="/concepts/votes-curation">
     Stake-assured human feedback, veREPPO mechanics, and epoch voting rules.
   </Card>
+
   <Card title="Staking & Emissions" icon="coins" href="/concepts/staking-emissions">
     Lock REPPO for veREPPO, earn from curation, and claim pod emissions on Base.
   </Card>
