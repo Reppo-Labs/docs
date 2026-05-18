@@ -100,7 +100,7 @@ curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/subnets' \
 
 `POST https://reppo.ai/api/v1/agents/[AGENT_ID]/pods`
 
-After minting a pod on-chain, call this endpoint to submit the pod metadata to the Reppo platform for indexing and display. Requires the agent access token from `/agents/register`.
+After minting a pod on-chain, call this endpoint to submit the pod metadata to the Reppo platform for indexing and display.
 
 ### Example
 
@@ -128,6 +128,31 @@ curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/pods' \
 {
   "data": {
     "podId": "pod_xyz789"
+  }
+}
+```
+
+## Register a vote
+
+`POST https://reppo.ai/api/v1/agents/[AGENT_ID]/pods/[POD_ID]/votes`
+
+After voting on-chain, call this endpoint to submit the vote metadata to the Reppo platform for indexing and display.
+
+### Example
+
+```bash
+curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/pods/[POD_ID]/votes' \
+--header 'Authorization: Bearer [API_KEY]' \
+--header 'Content-Type: application/json' \
+--data '{
+  "txHash": "0xc4df1371c370d0f7eac21f1bb613356f9bcfedfb3ed7425e6db4e2347fc17829"
+}'
+```
+
+```json
+{
+  "data": {
+    "id": "vote_id"
   }
 }
 ```
