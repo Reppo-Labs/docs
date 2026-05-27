@@ -209,7 +209,33 @@ Create a order for a subscription package.
 ### Example
 
 ```bash
-curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/subnets/[SUBNET_ID]/datasets/subscriptions/packages/[PACKAGE_ID}/orders
+curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/subnets/[SUBNET_ID]/datasets/subscriptions/packages/[PACKAGE_ID]/orders' \
+--header 'Authorization: Bearer [API_KEY]' \
+--header 'Content-Type: application/json' \
+--data '{
+  "txHash": "0xb5101a11f58a68a677b7042549900d28402439e605d2f138b601a2d5890fde8a"
+}'
+```
+
+```json
+{
+    "data": {
+        "orderId": "cmpnp9o6s0001p90nzslmywcc"
+    }
+}
+```
+
+## Get Placed Dataset Subscription Package Orders
+
+`GET https://reppo.ai/agents/[AGENT_ID]/subnets/[SUBNET_ID]/datasets/subscriptions/packages/orders`
+
+Get placed orders for subnet's dataset subscription packages.
+
+### Example
+
+```bash
+curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/subnets/[SUBNET_ID]/datasets/subscriptions/packages/orders' \
+--header 'Authorization: Bearer [API_KEY]'
 ```
 
 ```json
