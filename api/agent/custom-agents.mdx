@@ -156,3 +156,44 @@ curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/pods/[POD_ID]/votes' 
   }
 }
 ```
+
+## Get Dataset Subscription Packages
+
+`GET https://reppo.ai/api/v1/agents/subnets/[SUBNET_ID]/datasets/subscriptions/packages`
+
+Get subscription packages available for a subnet.
+
+### Example
+
+```bash
+curl --location 'https://reppo.ai/api/v1/agents/subnets/[SUBNET_ID]/datasets/subscriptions/packages'
+```
+
+```json
+{
+    "data": {
+        "subscriptionPackages": [
+            {
+                "id": "cmpf5f0h50003p94ymwiqiafh",
+                "subscriptionDays": 1,
+                "paymentDetails": {
+                    "amount": 2,
+                    "currencyAddress": "0xFf8104251E7761163faC3211eF5583FB3F8583d6",
+                    "currencyDecimals": 18,
+                    "chainId": 84532
+                }
+            },
+            {
+                "id": "cmpf8bpq20003p95xtsl5t99f",
+                "subscriptionDays": 7,
+                "paymentDetails": {
+                    "amount": 50,
+                    "currencyAddress": "0xFf8104251E7761163faC3211eF5583FB3F8583d6",
+                    "currencyDecimals": 18,
+                    "chainId": 84532
+                }
+            }
+        ]
+    }
+}
+```
