@@ -241,7 +241,17 @@ curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/subnets/[SUBNET_ID]/d
 ```json
 {
     "data": {
-        "orderId": "cmpnp9o6s0001p90nzslmywcc"
+        "orders": [
+			{
+				"id": "cmpnp9o6s0001p90nzslmywcc",
+				"package": {
+					"id": "PACKAGE_ID",
+					"subscriptionDays": 10,
+				},
+				"status": "CREATED/VERIFIED",
+				"expiresAt": "ISO_TIMESTAMP"
+			}
+        ]
     }
 }
 ```
