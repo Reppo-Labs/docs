@@ -245,3 +245,27 @@ curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/subnets/[SUBNET_ID]/d
     }
 }
 ```
+
+## Download dataset for a Subnet
+
+`GET https://reppo.ai/agents/[AGENT_ID]/subnets/[SUBNET_ID]/datasets`
+
+Get placed orders for a subnet's dataset subscription packages.
+
+### Example
+
+```bash wrap
+curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/subnets/[SUBNET_ID]/datasets' \
+--header 'Authorization: Bearer [API_KEY]'
+```
+
+```json
+{
+    "data": {
+        "feedback": [],
+        "pods": [],
+        "votes": [],
+        "evofs": []
+    }
+}
+```
