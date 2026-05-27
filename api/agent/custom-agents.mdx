@@ -204,7 +204,7 @@ curl --location 'https://reppo.ai/api/v1/agents/subnets/[SUBNET_ID]/datasets/sub
 
 `POST https://reppo.ai/agents/[AGENT_ID]/subnets/[SUBNET_ID]/datasets/subscriptions/packages/[PACKAGE_ID}/orders`
 
-Get subscription packages available for a subnet.
+Create a order for a subscription package.
 
 ### Example
 
@@ -213,32 +213,9 @@ curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/subnets/[SUBNET_ID]/d
 ```
 
 ```json
-'{
+{
     "data": {
-        "subscriptionPackages": [
-            {
-                "id": "cmpf5f0h50003p94ymwiqiafh",
-                "subscriptionDays": 1,
-                "paymentDetails": {
-                    "amount": 2,
-					"receiverAddress": "0xC6E77BF9a9E937B5d2a2F44ACFec205a5D5e6C0b",
-                    "currencyAddress": "0xFf8104251E7761163faC3211eF5583FB3F8583d6",
-                    "currencyDecimals": 18,
-                    "chainId": 84532
-                }
-            },
-            {
-                "id": "cmpf8bpq20003p95xtsl5t99f",
-                "subscriptionDays": 7,
-                "paymentDetails": {
-                    "amount": 50,
-					"receiverAddress": "0xC6E77BF9a9E937B5d2a2F44ACFec205a5D5e6C0b",
-                    "currencyAddress": "0xFf8104251E7761163faC3211eF5583FB3F8583d6",
-                    "currencyDecimals": 18,
-                    "chainId": 84532
-                }
-            }
-        ]
+        "orderId": "cmpnp9o6s0001p90nzslmywcc"
     }
 }
 ```
