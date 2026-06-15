@@ -55,6 +55,13 @@
               "guides/claim-emissions",
               "guides/agent-integration"
             ]
+          },
+          {
+            "group": "Ecosystem",
+            "pages": [
+              "ecosystem/product-roadmap",
+              "ecosystem/data-exchange"
+            ]
           }
         ]
       },

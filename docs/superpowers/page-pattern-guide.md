@@ -41,7 +41,7 @@ description: "One sentence, keyword-rich for search/SEO, names the key terms."
 | Prerequisite / important callout | `<Note>` |
 | Caution | `<Warning>` |
 | Helpful aside | `<Tip>` |
-| Navigation hub / "explore next" | `<CardGroup cols={2}>` with `<Card title icon href>` |
+| Navigation hub (homepage, Introduction only) | `<CardGroup cols={2}>` with `<Card title icon href>` |
 | Settings, schemas, comparisons | Markdown tables |
 | Requests / responses | fenced ` ```bash ` and ` ```json ` blocks |
 
