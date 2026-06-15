@@ -22,6 +22,7 @@
             "group": "Get Started",
             "pages": [
               "introduction",
+              "why-reppo",
               "authentication",
               "quickstart"
             ]
