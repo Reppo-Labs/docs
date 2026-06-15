@@ -12,6 +12,7 @@ Use this page as the quick reference for Reppo terminology. If a term appears in
 
 - **Reppo Protocol:** the incentive layer that coordinates AI training data markets through staking, publishing, and voting.
 - **Datanet:** an owner-defined market for sourcing, curating, and monetizing AI training data. See [Datanets](/concepts/datanets).
+- **Pod:** an atomic data unit published into a datanet, such as a tweet, image, video, or annotation. Each pod is minted as an NFT on Base. See [Pods](/concepts/pods).
 - **Data Exchange:** the marketplace where Reppo-produced data is packaged, discovered, and monetized downstream. See [Data Exchange](/ecosystem/data-exchange).
 - **RL environment:** the task, scoring function, and feedback loop used to improve a model. On Reppo, datanets act as market-based RL environments.
 - **RLHF:** reinforcement learning from human feedback. Reppo supports RLHF-style workflows through market-based publishing and curation.
@@ -54,9 +55,6 @@ Use this page as the quick reference for Reppo terminology. If a term appears in
 
 ## Whitepaper and legacy terms
 
-{/* FLAG: this "Pods" entry says pods are a legacy/whitepaper term replaced by datanets. That contradicts the live concepts/pods.mdx page, where a pod is a current, distinct concept (a data unit minted as an NFT), separate from a datanet (the market). Ported verbatim pending a decision from the team on which is correct. */}
-
-- **Pods:** a term used in whitepaper or legacy materials. Current product docs use **datanets** as the primary market term.
 - **Public and private datanets:** V1 language for datanet access models. In V2, datanet creation is permissionless and each owner sets access rules directly.
 - **Miners:** an older or informal synonym for publishers.
 - **Validators:** an older or informal synonym for voters.
