@@ -1,0 +1,76 @@
+---
+title: "Privacy and Security"
+sidebarTitle: "Privacy & Security"
+description: "Reppo's privacy and security model: the legacy V1 commit-reveal voting scheme, the current model based on data minimization and access control, and alignment with GDPR and CCPA."
+---
+
+{/* Source: trust-and-security/privacy-and-security.md (move) */}
+
+Reppo's privacy model has evolved across versions.
+
+<Note>
+  Commit-reveal was part of Reppo V1. It is not part of Reppo V2. This page separates that legacy voting mechanism from the current privacy and security model used across the network.
+</Note>
+
+## Legacy privacy mechanism: commit-reveal in Reppo V1
+
+Reppo V1 used a **commit-reveal scheme** to prevent bias, bribery, or vote manipulation during emissions and evaluation cycles.
+
+<Steps>
+  <Step title="Commit phase">
+    Voters generate a hash of their vote combined with a secret salt: `commit = hash(vote + salt)`. This commit is published on-chain, and no one can infer the actual vote or voter preference at this stage.
+  </Step>
+  <Step title="Reveal phase">
+    After the commit window closes, voters reveal both their original vote and salt. The system verifies that `hash(vote + salt)` matches the earlier commit. Only valid reveals are counted toward results and emissions.
+  </Step>
+</Steps>
+
+This approach prevented early disclosure of results, ensured votes could not be changed after committing, and kept voting anonymous and verifiable.
+
+**Example flow:** a user commits `("positive", salt123)`, the hash is stored on-chain, the user later reveals `("positive", salt123)`, the system verifies it, and reward distribution follows. This preserved fairness while anchoring a public proof of participation on the blockchain.
+
+## Current privacy and security model
+
+The current Reppo model does not rely on commit-reveal. Instead, privacy and security come from minimizing on-chain exposure, controlling access to sensitive data, and making important actions auditable without exposing underlying content.
+
+### Data retention and minimization
+
+- **On-chain data:** only essential cryptographic proofs, balances, and participation records are stored permanently. In V1 this included vote hashes. No human-readable content or PII ever touches the blockchain.
+- **Off-chain data:** content and metadata live in distributed storage (such as IPFS, Arweave, or datanet databases) for the minimum time required for verification or audits.
+- **Expiry policy:** once emissions and disputes are settled, off-chain data may be pruned or re-encrypted to remove wallet linkability.
+
+### Access controls for restricted datanets
+
+Restricted-access datanets allow organizations and creators to maintain full control over sensitive datasets.
+
+- **Role-based access:** datanet owners define who can read, write, and vote. Access is enforced by wallet allowlists or role tokens.
+- **Encryption:** all private data is encrypted at rest and in transit. Only datanet owners or their delegates hold the decryption keys.
+- **Verifiable audits:** each access or update emits a lightweight on-chain proof, ensuring transparency without revealing underlying data.
+
+### Compliance and legal alignment
+
+Reppo aligns with major global privacy standards while remaining fully decentralized.
+
+- **GDPR and CCPA principles**
+  - *Data minimization:* store only essential metadata on-chain.
+  - *Right to erasure:* datanet owners can rotate or revoke encryption keys to render data inaccessible.
+  - *Purpose limitation:* data gathered for model training cannot be repurposed or resold without new consent.
+- **PII boundaries:** personally identifiable information should never be uploaded. Content must be anonymized or pseudonymized before submission.
+- **Regional storage:** enterprise datanets can choose regional or jurisdiction-specific storage endpoints to comply with data-localization laws.
+
+### Security best practices
+
+- Smart contracts are minimal and audited by Pashov Group, reducing attack surfaces.
+- Sensitive operations such as key management, encryption, and verification workflows are handled off-chain under cryptographic proof where appropriate.
+- Reppo supports community bug bounties and third-party security audits to maintain transparency and trust.
+- Wallet authentication replaces centralized user accounts, ensuring full key custody by participants.
+
+## Summary
+
+Reppo's privacy design balances **transparency** and **confidentiality**:
+
+- Sensitive activity is verifiable without exposing raw user data.
+- Data is verifiable but not exposed.
+- Users retain control of their information.
+
+In V1, commit-reveal protected ballot privacy during voting. In the current model, privacy and security rely on minimizing on-chain exposure, controlling access to sensitive data, and making verification auditable without making underlying content public.

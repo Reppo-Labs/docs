@@ -30,11 +30,20 @@
           {
             "group": "Core Concepts",
             "pages": [
+              "concepts/how-reppo-works",
               "concepts/datanets",
               "concepts/pods",
               "concepts/votes-curation",
               "concepts/staking-emissions",
               "concepts/evof"
+            ]
+          },
+          {
+            "group": "Trust & Security",
+            "pages": [
+              "trust-security/adversarial-robustness",
+              "trust-security/verification-provenance",
+              "trust-security/privacy-security"
             ]
           },
           {
