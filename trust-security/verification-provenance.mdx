@@ -1,0 +1,99 @@
+---
+title: "Verification, Provenance, and Reputation"
+sidebarTitle: "Verification & Provenance"
+description: "How Reppo establishes authenticity, traceability, and accountability for crowdsourced AI training data through agent-based verification, staking, and datanet reputation."
+---
+
+{/* Source: trust-and-security/verification-provenance-and-reputation.md (move, not rewritten) */}
+
+<Note>
+  The native verification model described here is in the research and design phase. It will roll out in stages, beginning with internal verification workflows and expanding into more visible datanet reputation and trust signals.
+</Note>
+
+As a crowdsourced platform for AI training data, Reppo needs strong guarantees around **authenticity, traceability, and accountability**.
+
+In Reppo V2, content verification will be handled by the **Reppo Agent** together with **Reppo's staking mechanics**. This creates a native verification flow that links contributors, content, and datasets while introducing a reputation system for datanets.
+
+The goal is simple: make it possible to verify where data came from, who supplied it, how it performed, and which datanets consistently produce high-quality outputs.
+
+## The need for verifiable data provenance
+
+Crowdsourcing AI training data introduces both opportunity and risk. The open participation model enables global scale and diversity, but it also invites challenges such as:
+
+- **Data authenticity:** distinguishing genuine human or organizational contributions from AI-generated or plagiarized data.
+- **Quality accountability:** ensuring that contributors can be held accountable for the accuracy and integrity of their submissions.
+- **Attribution and reputation:** crediting contributors for high-quality data that enhances model performance.
+
+As Reppo expands, it needs a trust layer that is native to the protocol. Instead of relying on an external verification network, Reppo uses its own agent layer and staking-based incentives to verify submissions and score market participants over time.
+
+## How verification works in Reppo
+
+This is the planned verification flow in Reppo.
+
+<Steps>
+  <Step title="Contributor identity and onboarding">
+    Every contributor or publisher on Reppo is tied to an on-chain identity, such as a wallet or organizational credential. This identity becomes the base reference for reputation, submissions, and rewards.
+  </Step>
+  <Step title="Data submission and content hashing">
+    Each time a contributor submits data (images, text, annotations, audio, or model output), the submission is hashed into a **content digest** (`H_c`). This digest uniquely represents that piece of data, independent of storage location.
+  </Step>
+  <Step title="Reppo Agent verification">
+    The **Reppo Agent** evaluates submitted content and associated metadata. Depending on the datanet design, this can include provenance checks, formatting checks, policy checks, duplication detection, and task-specific validation rules. The result is a protocol-native verification signal that helps determine whether a submission is valid, usable, and eligible for downstream curation and monetization.
+  </Step>
+  <Step title="Staking-based validation">
+    Reppo's staking mechanics add an economic layer on top of this verification flow. Publishers risk capital when they submit data, voters risk capital when they curate, rank, and validate data, and datanet owners define the rules of participation and quality thresholds inside their markets. Because stake is attached to behavior, the network can measure not just activity, but **credible activity**.
+  </Step>
+  <Step title="Verification and downstream use">
+    Data consumers, model developers, or auditing frameworks can independently verify that the content hash matches the submitted asset, the submission passed the Reppo Agent's verification rules, the contributor's participation history is recorded on-chain, and the datanet's historical quality and curation signals support trust in the output. This creates a native trust chain from contributor to datanet to dataset to downstream consumer.
+  </Step>
+</Steps>
+
+## Datanet reputation system
+
+Reppo's staking mechanics do more than secure participation. They also create a **reputation system for datanets**. Over time, datanets build reputation based on signals such as:
+
+- **Verification quality:** how reliably submitted content passes agent checks and downstream review
+- **Curation quality:** how accurately voters surface useful, high-signal data
+- **Participant quality:** the historical performance of publishers and voters active in that datanet
+- **Economic performance:** fee generation, monetization outcomes, and repeat demand
+- **Dispute and failure rates:** how often low-quality, duplicate, or invalid content enters the market
+
+A strong datanet reputation helps buyers understand which markets consistently produce trustworthy data. It also creates a feedback loop where higher-quality datanets attract better contributors, better curation, and more demand.
+
+## Benefits of Reppo's native verification model
+
+| Feature | Description |
+|---|---|
+| **Protocol-native verification** | Verification is handled inside Reppo's own workflow instead of depending on external infrastructure. |
+| **Stake-backed trust** | Verification and curation are backed by economic stake, not just passive attestations. |
+| **Datanet reputation** | Each datanet develops a measurable reputation based on quality, outcomes, and historical performance. |
+| **Tamper resistance** | Content hashes, on-chain participation, and recorded outcomes make submissions auditable. |
+| **Scalable coordination** | Reppo can expand verification by combining agent-based checks with market-based curation. |
+
+This creates a self-reinforcing data economy where authenticity, credit, and accountability are built directly into the protocol.
+
+## Integration with Reppo's reputation graph
+
+In Reppo, reputation is not just about activity. It is also about **data integrity, verification success, and market performance**. This framework can feed into:
+
+- **Contributor trust scores:** giving more weight to high-integrity contributions
+- **Datanet trust scores:** helping buyers identify the most reliable markets
+- **Dataset lineage tracking:** improving traceability from raw submission to final dataset
+- **Reward systems:** allowing stronger incentives for consistently verified, high-quality work
+
+Over time, this allows Reppo to distinguish high-quality contributors and high-quality datanets from low-signal ones, making the platform a stronger source of trustworthy training data.
+
+## Roadmap and future direction
+
+The native verification model is currently in the **research and design phase**. Focus areas include:
+
+- **Scalability:** expanding Reppo Agent checks across high-volume data pipelines
+- **Privacy:** protecting contributor privacy while preserving verification and auditability
+- **Incentive alignment:** linking verification quality to contributor rewards and datanet reputation
+- **Governance:** defining how datanet-level reputation is measured, updated, and surfaced across the network
+
+## The broader vision
+
+Ultimately, the goal is not just to crowdsource data. It is to **raise the quality and trustworthiness** of AI training data at scale. By combining Reppo Agent verification with staking-based reputation, Reppo can build a provenance layer where every contribution is easier to audit, every market is easier to evaluate, and every high-quality datanet becomes easier to trust.
+
+This ensures that AI models trained on Reppo are not only powerful, but also more transparent, auditable, and aligned with strong economic incentives.
