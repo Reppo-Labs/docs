@@ -37,7 +37,15 @@ description: "One sentence, search-and-SEO friendly, mentions key terms."
 - `subnet` → `datanet`
 - `miner` → `publisher`
 - `validator` → `voter`
-- No em dashes anywhere.
+
+**Em dashes:** Remove most em dashes on every page we create or touch, rewriting
+each sentence so it reads naturally without the dash (comma, colon, period, or
+restructure). Not a blind delete; keep one only where removal genuinely hurts
+readability.
+
+**Source provenance comment:** Immediately after the frontmatter on every
+migrated page, add `{/* Source: <gitbook path(s)> [(consolidated)] */}` so the
+origin is traceable in the file. MDX comments use `{/* ... */}` and do not render.
 
 **Per-page verification (the "test" for docs work):**
 1. `npx mint broken-links` — must report no broken links.
@@ -283,6 +291,13 @@ Each task: fetch the GitBook source, read the existing Mintlify page in full, me
 - [ ] **Step 2: For each hit, classify** — prose (fix) vs. API path / field name / contract proper-noun (leave). When unsure, leave it and flag to Joey.
 - [ ] **Step 3: Fix the prose hits**, re-running `npx -y mint broken-links` after.
 - [ ] **Step 4: Commit** `docs: subnet to datanet prose cleanup across migrated pages`.
+
+### Task 23: Em-dash sweep across all pages
+**Files:** all `.mdx` (new + existing, excluding API paths/fields)
+- [ ] **Step 1: List em-dash hits** — `grep -rln "—" --include="*.mdx" .`
+- [ ] **Step 2: For each page, remove most em dashes** by rewriting the sentence so it reads naturally (comma, colon, period, or restructure). Do NOT mechanically delete. Keep one only where removal hurts readability.
+- [ ] **Step 3: Verify** — `npx -y mint broken-links` clean; spot-check rewritten sentences in `mint dev`.
+- [ ] **Step 4: Commit** `docs: remove most em dashes for consistency across the site`.
 
 > Note: API Reference prose subnet→datanet is explicitly OUT OF SCOPE for this plan (separate follow-up). Endpoint paths and JSON field names require engineering, not docs.
 

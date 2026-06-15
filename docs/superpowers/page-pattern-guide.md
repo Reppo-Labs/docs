@@ -55,11 +55,40 @@ description: "One sentence, keyword-rich for search/SEO, names the key terms."
 - Leave API endpoint paths (`/api/v1/me/subnets`), JSON field names (`subnetId`,
   `subnetName`), and contract labels untouched — those are backend contracts.
 
-## OPEN QUESTION — em dashes
+## Em dashes (DECIDED)
 
-The master-reference style rule says "no em dashes anywhere," but the existing
-pages use them liberally (e.g. `datanets.mdx` line 7). For new pages this guide
-follows the stated rule (no em dashes; use commas/colons/periods instead). Flag
-to Joey whether to (a) keep new pages em-dash-free and leave existing pages as
-is, (b) also strip them from existing pages for consistency, or (c) relax the
-rule. Pending that decision, new pages are written em-dash-free.
+Remove **most** em dashes, on both new and existing pages as we touch them.
+This is not a blind delete: rewrite each sentence so it reads naturally without
+the dash — use a comma, colon, period, or restructure the clause. Keep an em
+dash only in the rare case where removing it genuinely hurts readability. The
+goal is consistency across the combined site, not mechanical purging.
+
+## Source provenance comment (every migrated page)
+
+Immediately after the frontmatter, add an MDX comment recording the GitBook
+source(s) so traceability is checkable in the file:
+
+```mdx
+{/* Source: foundations/why-reppo.md + foundations/fixing-ai-data-labor-incentives.md (consolidated) */}
+```
+
+MDX comments use `{/* ... */}` (not HTML `<!-- -->`) and do not render.
+
+## Reviewing consolidated / merged pages — what to look for
+
+When a page combines two or more GitBook sources (Consolidate or Merge actions),
+call it out explicitly at review time ("this is X + Y combined") and check:
+
+- **No duplication:** the two sources often make overlapping points (e.g. both
+  critique the vendor model). Merge them once, do not repeat.
+- **Logical flow:** the seam between the two halves should read smoothly, not
+  like two pages stapled together.
+- **No contradictions:** figures, claims, and terminology must agree across the
+  merged sources.
+- **All cross-links re-pointed:** links from BOTH sources updated to new Mintlify paths.
+- **Nothing important dropped:** every substantive point from each source is
+  represented somewhere on the combined page.
+
+Pages with consolidation/merge in this migration: Why Reppo (T2), How Reppo
+Works (T3), Token Distribution (T7), Introduction (T15), Datanets (T16), Votes &
+Curation (T17).
