@@ -76,7 +76,9 @@
             "pages": [
               "resources/faq",
               "resources/glossary",
-              "resources/team"
+              "resources/team",
+              "resources/whitepapers",
+              "resources/audit-reports"
             ]
           }
         ]
