@@ -1,0 +1,64 @@
+---
+title: "Glossary"
+sidebarTitle: "Glossary"
+description: "Quick reference for Reppo terminology: core network terms, roles, token and market mechanics, rewards and evaluation, and verification and provenance."
+---
+
+{/* Source: resources/glossary.md (move) */}
+
+Use this page as the quick reference for Reppo terminology. If a term appears in older materials, the current docs default to V2 language.
+
+## Core network terms
+
+- **Reppo Protocol:** the incentive layer that coordinates AI training data markets through staking, publishing, and voting.
+- **Datanet:** an owner-defined market for sourcing, curating, and monetizing AI training data. See [Datanets](/concepts/datanets).
+- **Data Exchange:** the marketplace where Reppo-produced data is packaged, discovered, and monetized downstream. See [Data Exchange](/ecosystem/data-exchange).
+- **RL environment:** the task, scoring function, and feedback loop used to improve a model. On Reppo, datanets act as market-based RL environments.
+- **RLHF:** reinforcement learning from human feedback. Reppo supports RLHF-style workflows through market-based publishing and curation.
+- **Stake-Assured Human Feedback:** Reppo's mechanism for turning economic conviction into usable training signal. See [Votes & Curation](/concepts/votes-curation).
+
+## Roles
+
+- **Publisher:** a participant who submits raw data, task output, or model output into a datanet.
+- **Voter:** a participant who locks REPPO for voting power and uses stake-backed judgment to support or oppose what they think is useful.
+- **Datanet owner:** the participant who creates a datanet and defines its rules, fees, incentives, and access controls.
+- **Data contributor:** another name for a publisher.
+- **Domain expert:** a voter whose judgment is valuable in a specific market or task area.
+
+## Token and market mechanics
+
+- **REPPO:** the network utility token used for locking, incentives, and network-level fees. See [Token Utility](/tokenomics/token-utility).
+- **veREPPO:** voting power received by locking REPPO. It is allocated across datanets and epochs.
+- **Locking:** the network-level action of locking REPPO to receive veREPPO.
+- **Staking:** datanet-level reward participation. It is separate from locking and separate from publishing.
+- **Mining:** publishing data or task output into a datanet.
+- **Curation:** the process of using stake-backed judgment to rank, support, filter, or oppose submissions and markets.
+- **Epoch:** the 48-hour market window where voting and curation happen.
+- **Prediction market:** the stake-backed market structure Reppo uses to price quality, surface signal, and coordinate incentives.
+
+## Rewards, quality, and evaluation
+
+- **Performance Pool:** the pool that funds datanet staking rewards. It is funded by a share of datanet spin-up fees, publishing fees, and data access fees.
+- **EVOF:** one of the on-chain metrics used to score datanets for reward distribution.
+- **Publishing fee:** the fee paid to submit into a datanet.
+- **Access fee:** the fee paid to consume or access monetized datanet output.
+- **Learning signal:** the useful preference, ranking, or evaluation data produced through market activity.
+- **Evals:** structured evaluation workflows used to test model behavior or model quality.
+- **Benchmarking:** repeated measurement of model performance against a known task or standard.
+
+## Verification and provenance
+
+- **Reppo Agent:** the planned protocol-native agent layer for verification, provenance checks, and validation workflows. See [Verification, Provenance, and Reputation](/trust-security/verification-provenance).
+- **Provenance:** the record of where data came from, how it was submitted, and how it was curated.
+- **Reputation:** the historical quality and performance record of contributors and datanets.
+
+## Whitepaper and legacy terms
+
+{/* FLAG: this "Pods" entry says pods are a legacy/whitepaper term replaced by datanets. That contradicts the live concepts/pods.mdx page, where a pod is a current, distinct concept (a data unit minted as an NFT), separate from a datanet (the market). Ported verbatim pending a decision from the team on which is correct. */}
+
+- **Pods:** a term used in whitepaper or legacy materials. Current product docs use **datanets** as the primary market term.
+- **Public and private datanets:** V1 language for datanet access models. In V2, datanet creation is permissionless and each owner sets access rules directly.
+- **Miners:** an older or informal synonym for publishers.
+- **Validators:** an older or informal synonym for voters.
+
+If you want the system-level flow, start with [How Reppo Works](/concepts/how-reppo-works).
