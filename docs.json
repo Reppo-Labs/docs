@@ -70,6 +70,14 @@
               "ecosystem/product-roadmap",
               "ecosystem/data-exchange"
             ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              "resources/faq",
+              "resources/glossary",
+              "resources/team"
+            ]
           }
         ]
       },
