@@ -57,6 +57,14 @@
             ]
           },
           {
+            "group": "Tokenomics",
+            "pages": [
+              "tokenomics/token-utility",
+              "tokenomics/revenue-model",
+              "tokenomics/token-distribution"
+            ]
+          },
+          {
             "group": "Ecosystem",
             "pages": [
               "ecosystem/product-roadmap",
