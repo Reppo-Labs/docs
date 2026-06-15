@@ -1,0 +1,61 @@
+---
+title: "How Reppo Works"
+sidebarTitle: "How Reppo Works"
+description: "The system-level flow of the Reppo protocol: who participates, how data is published and curated, and how market activity produces AI training data."
+---
+
+{/* Source: foundations/how-reppo-works.md + foundations/participants-and-roles.md (consolidated) */}
+
+Reppo turns AI training data into a live market. Participants publish content, stake capital, vote on quality, and generate usable learning signal as they do it.
+
+## The participants
+
+There are three main actors in the Reppo ecosystem.
+
+| Role | Who they are | What they do |
+|---|---|---|
+| **Publishers** (data contributors) | Anyone with raw training data: vibe-coded apps, AI agents, videos, images, websites, written work | Pay to publish raw data into the datanets of their choice and bet on its originality and quality |
+| **Voters** (domain experts) | Active participants in 48-hour prediction markets | Lock REPPO to receive veREPPO, then express stake-backed preferences that form the network's curation layer |
+| **Datanet owners** | Individuals and enterprises running domain-specific markets | Launch datanets and build datasets by incentivizing publishers and voters to generate and label domain-specific data |
+
+Unlike other platforms, Reppo does not create tasks centrally. Publishers choose where to contribute and bet on their own quality, which avoids repetitive tasks, over-rewarding the same content, and extra validation overhead.
+
+<Note>
+  In the network's genesis phase, the Reppo Foundation stewarded data monetization and used trading revenue for buybacks that accrued value to the ecosystem. In Reppo V2, datanet owners take full ownership of their P&L and decentralize data generation and monetization, streamlining how value is created and captured across the network.
+</Note>
+
+## The flow, step by step
+
+<Steps>
+  <Step title="Datanet owners create markets">
+    Reppo is organized into [datanets](/concepts/datanets). Each datanet defines its own access rules, publishing fees, incentives, and quality standards, which lets different markets specialize around different tasks, domains, and buyers.
+  </Step>
+  <Step title="Publishers submit data">
+    Publishers submit text, images, video, audio, annotations, or agent-generated outputs into a chosen datanet. Submitting is not free. Publishing fees force contributors to make an economic decision about what is worth putting into the market.
+  </Step>
+  <Step title="Voters lock REPPO for veREPPO">
+    Voters lock REPPO to receive [veREPPO](/concepts/votes-curation), which gives them voting power at the network level. That power can then be allocated across datanets and epochs.
+  </Step>
+  <Step title="Markets reprice continuously during each epoch">
+    Voters use stake-backed judgment to support or oppose what they think is valuable. Within an epoch, voting power decays linearly over time, so earlier votes carry more weight than later ones. This rewards early conviction over late momentum-following, and because voting is continuous, weak positions can be challenged as new information appears. See [Adversarial Robustness](/trust-security/adversarial-robustness) for the deeper mechanism design.
+  </Step>
+  <Step title="Market activity produces training data">
+    Every submission, ranking, selection, and vote generates structured human feedback. That feedback becomes useful training data for AI systems.
+  </Step>
+  <Step title="Fees, incentives, and reputation reinforce quality">
+    Rewards can come from network emissions and datanet-level incentive programs, depending on how a market is configured. Publishers risk capital when they submit, voters risk capital when they curate, and datanet owners fund and shape the markets they want to grow. Over time, strong participants build reputation and performance history, which improves discovery, trust, and downstream demand.
+  </Step>
+</Steps>
+
+## Turning conviction into a market
+
+Reppo is not just collecting feedback. It is turning economic conviction into a live market for learning signal. Over time, the market is meant to reward signal discovery and punish low-quality noise, not through static moderation, but through open economic competition.
+
+<CardGroup cols={2}>
+  <Card title="Datanets" icon="network-wired" href="/concepts/datanets">
+    How domain-specific data markets define rules, fees, and rewards.
+  </Card>
+  <Card title="Votes & Curation" icon="thumbs-up" href="/concepts/votes-curation">
+    veREPPO, epoch voting, and time-decay mechanics in depth.
+  </Card>
+</CardGroup>
