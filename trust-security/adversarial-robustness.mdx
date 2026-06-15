@@ -1,0 +1,104 @@
+---
+title: "Adversarial Robustness"
+sidebarTitle: "Adversarial Robustness"
+description: "The attack surfaces in Reppo's stake-weighted voting market and the economic defenses that make manipulation expensive: pay-to-publish, decaying voting power, two-sided voting, and continuous repricing."
+---
+
+{/* Source: protocol-mechanics/adversarial-robustness.md (move) */}
+
+Reppo uses a continuous, stake-weighted voting system to evaluate datanets and allocate resources across the network. That design creates unique attack surfaces. It also creates strong economic defenses.
+
+The core idea is simple: participation is never free, timing matters, and weak positions can be challenged in real time.
+
+## Design principles
+
+Reppo's market design relies on a small set of reinforcing mechanics:
+
+- **Pay-to-publish:** submitting content requires upfront capital.
+- **Stake-weighted participation:** influence comes from stake, not identity count.
+- **Two-sided voting:** participants can vote for or against a datanet.
+- **Time-sensitive voting power:** voting power decays linearly across the epoch.
+- **Continuous repricing:** datanets can be re-evaluated as new information appears.
+
+These mechanics do not assume perfect actors. They assume that competitive markets can identify useful signal faster than low-quality behavior can sustain itself.
+
+## Spam and low-quality content injection
+
+**Threat.** Attackers publish large volumes of low-quality, adversarial, or irrelevant data to capture emissions.
+
+**Mitigation: pay-to-publish.** Each submission carries an upfront economic cost, which changes publishing from a free action into a capital allocation decision. Scaling a spam attack scales cost linearly, and if the content is low quality it is expected to attract negative votes and poor downstream support.
+
+**Why it matters.** Attackers do not just need volume. They need enough capital to keep low-signal submissions alive under open market scrutiny.
+
+## Vote sniping and temporal manipulation
+
+**Threat.** Participants wait until late in an epoch to vote after observing market direction, which can reduce price discovery and encourage reactive behavior over genuine discovery.
+
+**Mitigation: linear decay of voting power.** Voting power decays linearly over the course of the epoch. Early participation carries more weight than late participation. Late-stage vote swings still matter, but their impact is reduced.
+
+**Why it matters.** The system rewards early conviction and signal discovery, not simply following visible momentum at the end of the round.
+
+## Bribery and vote buying
+
+**Threat.** Participants offer incentives to attract votes toward weak or low-quality datanets.
+
+**Mitigation: two-sided voting and economic risk.** Support in Reppo is contestable. Votes can be cast both for and against a datanet, so artificial support can be challenged directly by participants who see the market as mispriced. Bribery is not a guaranteed exploit; it becomes an ongoing capital contest against opposing positions.
+
+**Why it matters.** Buying positive votes is not enough if the broader market has a direct mechanism to express negative conviction.
+
+## Cartel formation
+
+**Threat.** Groups coordinate to upvote each other's datanets and suppress stronger competitors.
+
+**Mitigation: open market exposure and performance dependence.** Cartels must continuously defend their positions in a live market. Capital locked into defending weak datanets has real opportunity cost, and if those datanets fail to produce useful learning signal, external participants can keep pressuring them with negative votes and capital reallocation.
+
+**Why it matters.** Coordination alone is not enough. Without underlying value, defensive spending becomes economically difficult to sustain.
+
+## Sybil attacks
+
+**Threat.** Attackers create many identities to simulate broad participation or amplify influence.
+
+**Mitigation: capital-weighted participation.** Voting influence is proportional to stake, not wallet count. Splitting the same capital across many identities does not create additional voting power.
+
+**Why it matters.** Reppo treats capital as the scarce input. Identity multiplication alone does not improve market position.
+
+## Low liquidity and early-stage instability
+
+**Threat.** In early network stages, small amounts of capital may move outcomes more than intended.
+
+**Current counterbalances:**
+
+- Pay-to-publish raises the baseline cost of manipulation.
+- Two-sided voting allows weak positions to be challenged quickly.
+- Continuous market participation enables repricing as better information appears.
+
+Thin markets are inherently more fragile than mature ones. In early phases, the network may benefit from additional stabilizers such as protocol-owned liquidity or curated bootstrap environments. Being explicit about this matters: early-stage systems should acknowledge liquidity risk rather than pretend it does not exist.
+
+## Signal extraction versus noise
+
+**Core risk.** Any stake-based market can drift toward reflecting capital concentration instead of true data quality.
+
+**Design counterbalance.** Reppo is designed to let markets correct mispricing continuously:
+
+- Voting is ongoing, not fixed.
+- Voting power decays over time, which favors early conviction.
+- Negative voting makes disagreement explicit.
+- Weak datanets can lose support as performance becomes clearer.
+
+Reppo does not assume perfect voters. It assumes that competitive, stake-backed markets can converge toward useful signal over time. That convergence depends on market design, and it gets stronger when datanets have clear tasks, credible access controls, expert participation, and enough liquidity to make mispricing expensive. In other words, stake is a coordination tool. It is not a substitute for domain expertise.
+
+## A stronger penalty layer
+
+One useful extension is a clearer downside for persistently weak datanets. For example, if a datanet ends an epoch with a strongly negative net position, the protocol could apply one or more penalties:
+
+- Partial stake loss for the publisher
+- Zeroed emissions for that epoch
+- Reduced eligibility in future rounds
+
+This kind of penalty sharpens the cost of being wrong. Without downside, low-quality strategies can devolve into spam, rotation, or repeated bribery attempts with limited consequences.
+
+## The broader interpretation
+
+At a high level, Reppo can be understood as continuous staking on the future usefulness of learning signal. Publishers stake on what they submit. Voters stake on what they believe will prove valuable. Over time, the market is meant to reward signal discovery and punish low-quality noise, not through static moderation, but through open economic competition.
+
+That framing is strongest for data curation, preference discovery, evals, and expert feedback markets. It is not a claim that every managed annotation workflow should be replaced by a fully open market.
