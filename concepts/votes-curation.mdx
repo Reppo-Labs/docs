@@ -65,6 +65,21 @@ The voting design addresses common manipulation vectors systematically:
 | **Vote sniping** | Time decay: earlier signals receive higher weight |
 | **Coordination attacks** | Continuous repricing: positions respond in real time as capital moves |
 
+## Where expertise enters
+
+Locking REPPO creates voting power and economic accountability. It does not create domain knowledge. Expertise enters at the datanet level, not from stake alone: each datanet owner chooses the task, access rules, incentive design, and acceptance standards. A datanet can be open, curated, or restricted to a narrower expert set. In specialized markets, stake backs judgment among eligible participants rather than manufacturing expertise where none exists.
+
+## How feedback is collected
+
+Datanets capture human feedback in several forms, depending on the task:
+
+- **Rating outputs:** people rate AI-generated content (good or bad, helpful or harmful, preferred or less preferred).
+- **Pairwise comparisons:** given two outputs, people pick which is better.
+- **Direct edits or suggestions:** annotators or users improve the output, such as rewriting text or correcting errors.
+- **Specialized feedback:** domain experts (for example lawyers, doctors, or teachers) review content for accuracy in their field.
+
+This feedback is turned into training signal for techniques like Reinforcement Learning from Human Feedback (RLHF) and Direct Preference Optimization (DPO).
+
 ## Curation signals as training data
 
 Every action on Reppo — submissions, votes, rankings, and written feedback — produces structured preference signals. These signals are the network's primary output. AI teams access not just curated content but the **preference signal itself**: ordered comparisons, for/against labels, and written rationales suitable for RLHF (reinforcement learning from human feedback) and DPO (direct preference optimization) training pipelines.
