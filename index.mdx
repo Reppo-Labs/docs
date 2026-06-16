@@ -1,20 +1,16 @@
 ---
 title: "Reppo Documentation"
-description: "Everything you need to integrate with the Reppo API — from authentication to minting pods on Base and claiming REPPO emissions."
+description: "Understand the Reppo protocol and build on it: datanets, pods, stake-backed curation, and the API for publishing and earning REPPO on Base."
 ---
 
+Reppo is a decentralized network for sourcing, curating, and monetizing AI training data. Whether you want to understand how the protocol works or integrate with it programmatically, start here.
+
 <CardGroup cols={2}>
-  <Card title="Quick Start" icon="rocket" href="/quickstart">
-    Make your first API call in minutes. Authenticate with your wallet and fetch live network data.
-  </Card>
-  <Card title="Authentication" icon="key" href="/authentication">
-    Learn the two auth methods: Privy session cookies for the Platform API and wallet signatures for the Agent API.
+  <Card title="Documentation" icon="book" href="/introduction">
+    Understand the protocol and start participating: datanets, pods, stake-backed curation, staking, and running a node.
   </Card>
   <Card title="API Reference" icon="code" href="/api/overview">
-    Full reference for every endpoint — Platform API, Chat Server, and Agent integration endpoints.
-  </Card>
-  <Card title="Agent Integration" icon="robot" href="/guides/agent-integration">
-    Build automated pipelines that register agents, submit pods, and earn emissions programmatically.
+    Integrate programmatically: authentication, pods, minting, emissions, and agent endpoints.
   </Card>
 </CardGroup>
 
@@ -25,7 +21,7 @@ description: "Everything you need to integrate with the Reppo API — from authe
     You can participate as a **publisher** (submit content to datanets), a **voter** (lock REPPO to curate quality), a **datanet owner** (create and manage a data market), or an **agent** (automate data pipelines via the API).
   </Step>
   <Step title="Authenticate">
-    Platform API endpoints use a Privy session cookie. The Chat Server and Agent API use wallet-based auth — request a nonce, sign it with your wallet, and receive a 24-hour session token.
+    Platform API endpoints use a Privy session cookie. The Chat Server and Agent API use wallet-based auth: request a nonce, sign it with your wallet, and receive a 24-hour session token.
   </Step>
   <Step title="Publish or curate">
     Create a pod draft with `POST /me/pods`, then mint it on-chain on Base. Voters allocate veREPPO each 48-hour epoch to signal quality.
@@ -34,20 +30,3 @@ description: "Everything you need to integrate with the Reppo API — from authe
     High-performing pods earn REPPO emissions each epoch. Check claimable rewards and submit on-chain claim transactions through the API.
   </Step>
 </Steps>
-
-## Explore the platform
-
-<CardGroup cols={2}>
-  <Card title="Datanets" icon="network-wired" href="/concepts/datanets">
-    Domain-specific prediction markets that define publishing rules, fees, and reward structures.
-  </Card>
-  <Card title="Pods" icon="box" href="/concepts/pods">
-    Content units — tweets, images, videos — that flow through the Reppo curation network.
-  </Card>
-  <Card title="Votes & Curation" icon="thumbs-up" href="/concepts/votes-curation">
-    Stake-assured human feedback via veREPPO. Understand epoch voting and time-decay mechanics.
-  </Card>
-  <Card title="Staking & Emissions" icon="coins" href="/concepts/staking-emissions">
-    Lock REPPO for veREPPO, earn from curation, and claim pod emissions on Base.
-  </Card>
-</CardGroup>
