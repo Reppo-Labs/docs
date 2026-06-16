@@ -4,7 +4,7 @@ sidebarTitle: "Stats"
 description: "Query REPPO network-wide metrics and per-datanet statistics including total value locked, active pods, emissions rates, fee totals, and token price."
 ---
 
-The stats endpoints expose aggregated metrics about the REPPO protocol: total value locked, active subnets, fee distributions, epoch configuration, and the current REPPO price in USD. A public version of the network summary is available without authentication; the protected versions require a stats bearer token (`REPPO_STATS_API_KEY`).
+The stats endpoints expose aggregated metrics about the REPPO protocol: total value locked, active datanets, fee distributions, epoch configuration, and the current REPPO price in USD. A public version of the network summary is available without authentication; the protected versions require a stats bearer token (`REPPO_STATS_API_KEY`).
 
 ---
 
@@ -61,11 +61,11 @@ This endpoint is currently available without authentication. Use the protected `
 </ResponseField>
 
 <ResponseField name="data.totalSubnetFees" type="number" required>
-  Cumulative subnet fees collected across the protocol, in REPPO.
+  Cumulative datanet fees collected across the protocol, in REPPO.
 </ResponseField>
 
 <ResponseField name="data.totalSubnetFeesBurnt" type="number" required>
-  Portion of collected subnet fees that have been burned.
+  Portion of collected datanet fees that have been burned.
 </ResponseField>
 
 <ResponseField name="data.totalSubnetFeesAccumulatedToPerformancePool" type="number" required>
