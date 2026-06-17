@@ -1,0 +1,7 @@
+/* Roadmap task lists: render completed (checked) items with the brand accent color
+   instead of the muted, disabled-grey default. Scoped to task lists so no other
+   checkboxes are affected. Unchecked items stay as empty boxes. */
+.contains-task-list input[type="checkbox"] {
+  accent-color: #ea8d3a;
+  opacity: 1;
+}
