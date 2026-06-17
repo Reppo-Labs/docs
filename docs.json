@@ -35,7 +35,8 @@
               "concepts/pods",
               "concepts/votes-curation",
               "concepts/staking-emissions",
-              "concepts/evof"
+              "concepts/evof",
+              "concepts/orquestra"
             ]
           },
           {
@@ -54,7 +55,6 @@
               "guides/mint-tweet",
               "guides/claim-emissions",
               "guides/agent-integration",
-              "guides/orquestra-overview",
               "guides/operator-node"
             ]
           },
