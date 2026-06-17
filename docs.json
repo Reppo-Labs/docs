@@ -68,8 +68,8 @@
           {
             "group": "Roadmap",
             "pages": [
-              "ecosystem/product-roadmap",
-              "ecosystem/data-exchange"
+              "roadmap/product-roadmap",
+              "roadmap/data-exchange"
             ]
           },
           {
