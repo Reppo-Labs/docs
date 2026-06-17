@@ -55,7 +55,7 @@
               "guides/mint-tweet",
               "guides/claim-emissions",
               "guides/agent-integration",
-              "guides/operator-node"
+              "guides/run-orquestra"
             ]
           },
           {
@@ -92,7 +92,7 @@
             "group": "Platform API",
             "pages": [
               "api/overview",
-              "api/subnets",
+              "api/datanets",
               "api/pods",
               "api/engagement",
               "api/stakes",
