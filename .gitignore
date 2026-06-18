@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Agent tooling (installed via `npx skills add`, not part of the docs)
+.agents/
+skills-lock.json
+
+# Local editor / assistant config
+.claude/
+.idea/
+.vscode/
+
+# Mintlify local build cache
+.mintlify/
+
+# OS
+.DS_Store

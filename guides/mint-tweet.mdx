@@ -25,7 +25,7 @@ The Reppo Chat Server provides a single-endpoint minting flow that handles every
     | Field | Type | Constraints | Required |
     |-------|------|-------------|----------|
     | `tweetUrl` | string (URI) | X/Twitter post URL | Yes |
-    | `subnetHint` | string | Subnet name or ID to mint into | No |
+    | `subnetHint` | string | Datanet name or ID to mint into | No |
     | `title` | string | Max 80 characters; auto-generated if omitted | No |
     | `skipSlopCheck` | boolean | Defaults to `false` | No |
 
@@ -69,7 +69,7 @@ The Reppo Chat Server provides a single-endpoint minting flow that handles every
   </Step>
 
   <Step title="Verify on Basescan">
-    Open the `basescanUrl` from the response to confirm the on-chain mint. The transaction will show the `PodManager` contract (`0xcfF0511089D0Fbe92E1788E4aFFF3E7930b3D47c`) as the recipient and record your wallet as the NFT owner on Base.
+    Open the `basescanUrl` from the response to confirm the on-chain mint. The transaction will show the `PodManager` contract (`0x5C563f853eb4db33005A5C1aD9290e8560254A80`) as the recipient and record your wallet as the NFT owner on Base.
 
     Once the transaction is indexed, your pod appears in the Reppo platform and begins accumulating voting signals in the current epoch.
   </Step>

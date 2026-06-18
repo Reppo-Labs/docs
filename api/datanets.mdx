@@ -8,7 +8,7 @@ Datanets (referred to as subnets in the API) are the curated data markets at the
 
 ---
 
-## List my subnets
+## List my datanets
 
 <br />
 
@@ -59,7 +59,7 @@ curl https://reppo.ai/api/v1/me/subnets \
 
 ---
 
-## Create a subnet draft
+## Create a datanet draft
 
 <br />
 
@@ -144,7 +144,7 @@ curl -X POST https://reppo.ai/api/v1/me/subnets \
 
 ---
 
-## Get one of my subnets
+## Get one of my datanets
 
 <br />
 
@@ -192,7 +192,7 @@ Returns a single datanet owned by the authenticated user.
 
 ---
 
-## Publish a subnet
+## Publish a datanet
 
 <br />
 
@@ -440,7 +440,7 @@ Updates the amount of the primary token emitted to curators per epoch in this da
 
 ---
 
-## List public subnets
+## List public datanets
 
 <br />
 
@@ -502,7 +502,7 @@ curl "https://reppo.ai/api/v1/public/subnets?page=1&limit=20&search=AI"
 
 ---
 
-## Get a public subnet by ID
+## Get a public datanet by ID
 
 <br />
 
@@ -556,7 +556,7 @@ curl https://reppo.ai/api/v1/public/subnets/subnet_abc123
 
 ## Subnet schema
 
-The `Subnet` object is returned by all subnet endpoints.
+The `Subnet` object is returned by all datanet endpoints.
 
 <ResponseField name="id" type="string" required>
   Internal datanet ID.

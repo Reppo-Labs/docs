@@ -71,7 +71,7 @@ Voting power is computed as a **snapshot at the epoch boundary**.
 
 ## Epoch EVOF vs. Cumulative EVOF
 
-Two versions of the score are tracked for every Datanet:
+Two versions of the score are tracked for every datanet:
 
 | Version | Description |
 |---|---|
@@ -82,17 +82,17 @@ A Datanet with an epoch EVOF of 42 and a cumulative EVOF of 1,284 has meaningful
 
 ## EVOF as a qualitative benchmarking tool
 
-Because EVOF is computed on the same formula for every Datanet every 48 hours, it enables **direct, cross-datanet comparison of data quality** — something that was previously impossible without domain-specific evaluation.
+Because EVOF is computed on the same formula for every datanet every 48 hours, it enables **direct, cross-datanet comparison of data quality** — something that was previously impossible without domain-specific evaluation.
 
-**For Datanet owners:** EVOF is your quality dashboard. When epoch EVOF grows consistently and cumulative score builds, your dataset is maturing into something trustworthy. When it drops or plateaus against the network average, investigate — are participation rates declining? Is conviction thinning?
+**For datanet owners:** EVOF is your quality dashboard. When epoch EVOF grows consistently and cumulative score builds, your dataset is maturing into something trustworthy. When it drops or plateaus against the network average, investigate — are participation rates declining? Is conviction thinning?
 
-**For data consumers:** Before subscribing to a Datanet's output for AI training, fine-tuning, or agent development, check its EVOF trajectory against the network benchmark. A high, growing cumulative EVOF provides a much stronger quality guarantee than raw dataset size alone. Two datanets with the same number of labels can have radically different EVOF scores — which is precisely the signal you need to evaluate.
+**For data consumers:** Before subscribing to a datanet's output for AI training, fine-tuning, or agent development, check its EVOF trajectory against the network benchmark. A high, growing cumulative EVOF provides a much stronger quality guarantee than raw dataset size alone. Two datanets with the same number of labels can have radically different EVOF scores — which is precisely the signal you need to evaluate.
 
-**For the protocol:** EVOF creates a public, real-time ranking of credibility across all Datanets — directing capital and attention toward the most trustworthy data markets and creating healthy competition to maintain genuine participation.
+**For the protocol:** EVOF creates a public, real-time ranking of credibility across all datanets — directing capital and attention toward the most trustworthy data markets and creating healthy competition to maintain genuine participation.
 
 ## How EVOF shapes emissions
 
-EVOF carries **40% weight** in the Performance Pool distribution formula — the single largest factor in how rewards are allocated across Datanets every third epoch. Datanets that maintain deep, broad, and consistent economic conviction are directly rewarded. Datanets with thin or manufactured curation receive proportionally less.
+EVOF carries **40% weight** in the Performance Pool distribution formula — the single largest factor in how rewards are allocated across datanets every third epoch. Datanets that maintain deep, broad, and consistent economic conviction are directly rewarded. Datanets with thin or manufactured curation receive proportionally less.
 
 | Metric | Weight |
 |---|---|
@@ -113,5 +113,5 @@ This design creates a direct alignment between data quality and economic outcome
 | Is my dataset large? | Is my dataset credible — now, and over time? |
 
 <Note>
-  EVOF is computed per Datanet every 48 hours. Voting power is snapshotted at the epoch boundary, so all votes within an epoch carry consistent weight for a given user regardless of when they were cast.
+  EVOF is computed per datanet every 48 hours. Voting power is snapshotted at the epoch boundary, so all votes within an epoch carry consistent weight for a given user regardless of when they were cast.
 </Note>

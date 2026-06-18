@@ -61,6 +61,22 @@ The distribution is weighted across datanets by four metrics:
 
 Datanets that generate more activity, attract more staked capital, and produce higher fee revenue receive a proportionally larger share of each distribution.
 
+## How staking rewards are calculated
+
+Staking is a datanet-level reward mechanism. It is separate from locking REPPO for veREPPO and separate from publishing, and it is designed to reward long-term REPPO holders and high-quality datanet operators.
+
+To reduce short-term gaming, datanet scores use 3-epoch smoothing:
+
+- **50%** from the last epoch
+- **30%** from epoch -2
+- **20%** from epoch -3
+
+One strong epoch helps, but sustained performance matters more.
+
+Stake is time-weighted across the full 48-hour epoch. Stake added late earns only for the time it is active, so stake added at hour 46 earns for the final 2 hours only. Stakes carry forward automatically at full weight into the next epoch.
+
+New datanets do not earn Performance Pool rewards in their launch epoch. They must complete one full epoch before becoming eligible.
+
 ## Amplifi staking
 
 In addition to curation staking, Reppo supports **Amplifi staking** — a separate staking program with its own reward structure. To record an Amplifi stake:

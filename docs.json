@@ -22,6 +22,7 @@
             "group": "Get Started",
             "pages": [
               "introduction",
+              "why-reppo",
               "authentication",
               "quickstart"
             ]
@@ -29,11 +30,21 @@
           {
             "group": "Core Concepts",
             "pages": [
+              "concepts/how-reppo-works",
               "concepts/datanets",
               "concepts/pods",
               "concepts/votes-curation",
               "concepts/staking-emissions",
-              "concepts/evof"
+              "concepts/evof",
+              "concepts/orquestra"
+            ]
+          },
+          {
+            "group": "Trust & Security",
+            "pages": [
+              "trust-security/adversarial-robustness",
+              "trust-security/verification-provenance",
+              "trust-security/privacy-security"
             ]
           },
           {
@@ -44,8 +55,32 @@
               "guides/mint-tweet",
               "guides/claim-emissions",
               "guides/agent-integration",
-              "guides/orquestra-overview",
-              "guides/operator-node"
+              "guides/run-orquestra"
+            ]
+          },
+          {
+            "group": "Tokenomics",
+            "pages": [
+              "tokenomics/token-utility",
+              "tokenomics/revenue-model",
+              "tokenomics/token-distribution"
+            ]
+          },
+          {
+            "group": "Roadmap",
+            "pages": [
+              "roadmap/product-roadmap",
+              "roadmap/data-exchange"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              "resources/faq",
+              "resources/glossary",
+              "resources/team",
+              "resources/whitepapers",
+              "resources/audit-reports"
             ]
           }
         ]
@@ -57,7 +92,7 @@
             "group": "Platform API",
             "pages": [
               "api/overview",
-              "api/subnets",
+              "api/datanets",
               "api/pods",
               "api/engagement",
               "api/stakes",

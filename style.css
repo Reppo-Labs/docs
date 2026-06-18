@@ -1,0 +1,26 @@
+/* Roadmap task lists: render completed (checked) items as a filled, brand-colored box
+   with a white check, instead of the muted disabled-grey default. Mintlify renders
+   task-list checkboxes with the `disabled` attribute, and browsers force disabled
+   checkboxes grey (so `accent-color` alone does not work). Fully restyling the control
+   with `appearance: none` overrides that. Unchecked items stay as empty boxes. */
+.contains-task-list input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.05em;
+  height: 1.05em;
+  border: 1.5px solid rgba(150, 150, 150, 0.6);
+  border-radius: 4px;
+  vertical-align: -0.2em;
+  opacity: 1;
+  background-color: transparent;
+  cursor: default;
+}
+
+.contains-task-list input[type="checkbox"]:checked {
+  background-color: #ea8d3a;
+  border-color: #ea8d3a;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='3.5 8.5 6.5 11.5 12.5 4.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 80%;
+}

@@ -1,0 +1,78 @@
+---
+title: "Frequently Asked Questions"
+sidebarTitle: "FAQ"
+description: "Common questions about Reppo: what it is, how datanets and competition work, how publishing and voting differ from other networks, and how proven the mechanism is today."
+---
+
+{/* Source: resources/faq.md (move + subnet/datanet and miner/voter cleanup) */}
+
+## What is Reppo?
+
+Reppo is a decentralized platform and protocol leveraging on-chain prediction markets for AI training data, enabling open contribution, verification, and monetization of high-quality datasets.
+
+## So is it a blockchain or a platform?
+
+Today, it is an AI platform powered by Reppo Protocol. The platform is primarily designed for crowdsourcing AI training, evals, and benchmarking data, and it can also be used to generate datasets unrelated to artificial intelligence, given its decentralized and permissionless nature.
+
+Beyond AI training, the same mechanism can support any market that needs stake-backed human feedback, subject to protocol and governance guardrails.
+
+Reppo is currently deployed on Base. $REPPO is the utility token that powers locking, incentives, and network fees.
+
+## So what is a datanet?
+
+A datanet is a competitive market that produces a dataset or another desired output, while Reppo Protocol tracks and incentivizes the work required to produce it.
+
+Anyone can create a datanet by paying a fee in $REPPO, or participate in an existing datanet. Each datanet can also set its own access rules, which means a market can be open to everyone, curated to a smaller group, or restricted to invited experts.
+
+## How does competition work in a datanet?
+
+The work is defined by the datanet creator. Publishers submit data or task output. Voters lock REPPO for veREPPO, then use stake-backed voting to support or oppose what they think is valuable.
+
+Today, datanets use the core mechanism described in [Stake-Assured Human Feedback](/concepts/votes-curation).
+
+## Does locking more REPPO replace expertise?
+
+No. Locking REPPO creates voting power and economic accountability. It does not create domain knowledge. Expertise comes from datanet design, access control, task definition, and the participants a market admits. In expert markets, stake backs judgment among qualified participants.
+
+## Is Reppo just rewarding people for agreeing with large token holders?
+
+No. Reppo uses continuous, two-sided voting. Participants can support or oppose markets as information changes. Voting power also decays across the epoch, which rewards early signal discovery over late momentum-following.
+
+That said, thin markets are more fragile than deep ones. Bootstrap liquidity and good market design still matter.
+
+## Is Reppo trying to replace every annotation vendor?
+
+No. Reppo is a coordination layer for AI training data, evals, and feedback markets. It fits best where human judgment is scarce, where participants should have economic skin in the game, and where continuous repricing is useful.
+
+Some workflows still need tightly managed operations, restricted participation, or enterprise controls. Reppo supports that through owner-defined datanets with custom access and monetization rules.
+
+## How proven is the mechanism today?
+
+The protocol, token, and datanet mechanics are live, and the core economic loop is already operating on mainnet. Broader proof on data quality and benchmark outperformance is still a scaling milestone. That is why the roadmap includes stronger quality metrics, more datanets, and downstream demand growth.
+
+## What exactly is the task of a publisher?
+
+The task differs by datanet. Some datanets source AI-generated content from domain experts. Others source human feedback on custom content supplied by the datanet owner. Others collect raw proprietary data, annotations, or evaluation signal.
+
+## Do datanets talk to each other?
+
+Not automatically. Each datanet controls its own access rules and monetization. A datanet owner can keep outputs restricted, share them with specific participants, or monetize them externally. The network also burns part of the $REPPO fees tied to datanet creation and operation, which accrues value to $REPPO holders.
+
+## How is publishing and voting different from other networks?
+
+On Reppo, publishing means supplying the raw data, task output, or content a datanet wants to evaluate. Voting means providing stake-backed curation, ranking, and preference data on top of that supply.
+
+## What is the incentive to publish, vote, or create a datanet?
+
+Reppo incentivizes participation through REPPO emissions, datanet-level incentive programs, and fee revenue. See [Token Distribution](/tokenomics/token-distribution) for token distribution context.
+
+The weekly emission distribution of the REPPO utility token is as follows:
+
+- 5% to active datanet owners
+- 5% to Reppo Treasury
+- 45% to publishers
+- 45% to voters
+
+## I don't want to create a datanet. Can I just publish or vote?
+
+Yes, you can.

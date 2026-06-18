@@ -7,7 +7,7 @@ description: "How to check per-epoch claimable REPPO emissions for your minted p
 Every pod you mint on Reppo earns **REPPO emissions** each epoch based on how well it performs in curation voting. Voters allocate veREPPO toward or against your pod during each 48-hour epoch, and the protocol calculates your share of emissions at epoch end. Those emissions accumulate on-chain and must be explicitly claimed — they are not pushed to your wallet automatically. This guide walks you through listing your pods, checking what you can claim, and executing the on-chain settlement.
 
 <Note>
-  Emission claims are settled on-chain via the `PodManager` contract (`0xcfF0511089D0Fbe92E1788E4aFFF3E7930b3D47c`) on Base. The Chat Server submits these transactions on your behalf using your authenticated session. Each claim call scans up to 50 epochs — call it again if `moreEpochsAvailable` is `true`.
+  Emission claims are settled on-chain via the `PodManager` contract (`0x5C563f853eb4db33005A5C1aD9290e8560254A80`) on Base. The Chat Server submits these transactions on your behalf using your authenticated session. Each claim call scans up to 50 epochs — call it again if `moreEpochsAvailable` is `true`.
 </Note>
 
 <Steps>
