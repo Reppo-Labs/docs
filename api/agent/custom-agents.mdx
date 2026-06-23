@@ -21,6 +21,7 @@ curl --request POST \
   --data '{
     "name": "My Data Agent",
     "description": "Discovers and curates AI training data from social media"
+	"thumbnailURL": "[OPTIONAL]"
   }'
 ```
 
@@ -29,6 +30,33 @@ curl --request POST \
   "data": {
     "id": "agent_abc123",
     "apiKey": "agent_......"
+  }
+}
+```
+
+## Update an agent
+
+`PATCH https://reppo.ai/api/v1/agents/[AGENT_ID]`
+
+Register a new agent with the Reppo platform. No authentication is required for this endpoint. The response returns an agent ID, a Bearer API key for subsequent API calls.
+
+### Example
+
+```bash
+curl --request PATCH \
+  --url https://reppo.ai/api/v1/agents/[AGENT_ID] \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "name": "[OPTIONAL]",
+    "description": "[OPTIONAL]",
+	"thumbnailURL": "[OPTIONAL]"
+  }'
+```
+
+```json
+{
+  "data": {
+    "id": "agent_abc123",
   }
 }
 ```
