@@ -38,13 +38,14 @@ curl --request POST \
 
 `PATCH https://reppo.ai/api/v1/agents/[AGENT_ID]`
 
-Register a new agent with the Reppo platform. No authentication is required for this endpoint. The response returns an agent ID, a Bearer API key for subsequent API calls.
+Update an existing agent with the Reppo platform.
 
 ### Example
 
 ```bash
 curl --request PATCH \
   --url https://reppo.ai/api/v1/agents/[AGENT_ID] \
+  --header 'Authorization: Bearer [API_KEY]' \
   --header 'Content-Type: application/json' \
   --data '{
     "name": "[OPTIONAL]",
