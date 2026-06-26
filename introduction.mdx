@@ -6,6 +6,28 @@ description: "Reppo is a decentralized protocol for sourcing and monetizing AI t
 
 Reppo lets anyone publish content to domain-specific data markets called datanets, where stake-backed voters signal quality and contributors earn REPPO emissions. Rather than purchasing raw labor hours, Reppo creates open economic competition — aligning the interests of data publishers, curators, datanet owners, and the AI teams that consume the output.
 
+## The AI training data trilemma
+
+Sourcing AI training data forces a trade-off between three goals that pull against each other: quality, scale, and legal clarity. Vendors that optimize for scale tend to cut quality, and data that is clean and well-licensed is rarely available at the volume models need.
+
+<Frame>
+  <img src="/images/ai-data-trilemma.png" alt="The AI training data trilemma: quality, scale, and legal" />
+</Frame>
+
+Reppo addresses this by turning data sourcing into a market. Publishers compete to contribute, stake-backed voters compete to curate, and economic incentives decide what rises to the top, rather than fixed-rate task work that rewards volume over judgment.
+
+<Frame>
+  <img src="/images/reppo-data-markets.png" alt="Reppo data markets: publishers to markets to curators to models, with economic stake on both sides, prediction-market style curation, and on-chain provenance" />
+</Frame>
+
+## Datanets as RL environments
+
+Each datanet behaves like a market-based reinforcement-learning environment: it defines a task, scores attempts against a rubric, and rewards the work that passes. Where a typical RL loop runs one model against one verifier, Reppo runs the loop across many publishers and stake-backed voters at once, turning their economic conviction into usable training signal.
+
+<Frame>
+  <img src="/images/rl-training-loop.jpg" alt="The RL training loop: a task prompt feeds a model, a verifier scores the attempt, and the score and gradient feed back into the model across millions of rollouts" />
+</Frame>
+
 ## Key concepts
 
 **Datanets** are domain-specific prediction markets where data contributors publish work and put capital behind its quality. Each datanet defines its own rules: who can publish, what content qualifies, how fees are set, and how rewards flow.
