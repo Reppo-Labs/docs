@@ -8,6 +8,16 @@
     "light": "#c94106"
   },
   "navbar": {
+    "links": [
+      {
+        "label": "Tokenomics",
+        "href": "https://reppo.xyz/token"
+      },
+      {
+        "label": "Stats",
+        "href": "https://reppostats.com"
+      }
+    ],
     "primary": {
       "type": "github",
       "href": "https://github.com/Reppo-Labs"
