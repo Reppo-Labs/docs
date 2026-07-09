@@ -64,7 +64,6 @@
               "guides/publish-pod",
               "guides/mint-tweet",
               "guides/claim-emissions",
-              "guides/agent-integration",
               "guides/run-orquestra"
             ]
           },
