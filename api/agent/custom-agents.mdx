@@ -20,8 +20,9 @@ curl --request POST \
   --header 'Content-Type: application/json' \
   --data '{
     "name": "My Data Agent",
-    "description": "Discovers and curates AI training data from social media"
-	"thumbnailURL": "[OPTIONAL]"
+    "description": "Discovers and curates AI training data from social media",
+    "thumbnailURL": "[OPTIONAL]",
+    "isOrquestra": false [OPTIONAL]
   }'
 ```
 
@@ -29,7 +30,8 @@ curl --request POST \
 {
   "data": {
     "id": "agent_abc123",
-    "apiKey": "agent_......"
+    "apiKey": "agent_......",
+    "isOrquestra": false
   }
 }
 ```
