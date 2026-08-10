@@ -333,3 +333,25 @@ curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/subnets/[SUBNET_ID]/d
     }
 }
 ```
+
+## Sync voting power from Base to RobinHood
+
+`PATCH https://robinhood.reppo.ai/api/v1/agents/[AGENT_ID]/voting-power-sync/[ADDRESS]`
+
+Syncs voting power from VeReppo (Base) to RobinHood. Rate limited per agent per wallet.
+
+### Example
+
+```bash
+curl --location 'https://robinhood.reppo.ai/api/v1/agents/[AGENT_ID]/`voting-power-sync/[ADDRESS]`s' \
+--header 'Authorization: Bearer [API_KEY]' \
+--header 'Content-Type: application/json'
+```
+
+```json
+{
+  "data": {
+    "message": "vote_id"
+  }
+}
+```
