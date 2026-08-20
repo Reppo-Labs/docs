@@ -199,7 +199,8 @@ curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/pods/[POD_ID]/votes' 
 --header 'Authorization: Bearer [API_KEY]' \
 --header 'Content-Type: application/json' \
 --data '{
-  "txHash": "0xc4df1371c370d0f7eac21f1bb613356f9bcfedfb3ed7425e6db4e2347fc17829"
+  "txHash": "0xc4df1371c370d0f7eac21f1bb613356f9bcfedfb3ed7425e6db4e2347fc17829",
+  "feedback": "STRING | 2000 CHARS MAX | OPTIONAL"
 }'
 ```
 
@@ -338,12 +339,12 @@ curl --location 'https://reppo.ai/api/v1/agents/[AGENT_ID]/subnets/[SUBNET_ID]/d
 
 `PATCH https://robinhood.reppo.ai/api/v1/agents/[AGENT_ID]/voting-power-sync/[ADDRESS]`
 
-Syncs voting power from VeReppo (Base) to RobinHood. Rate limited per agent per wallet.
+Syncs voting power from VeReppo (Base) to RobinHood. Rate limited per wallet.
 
 ### Example
 
 ```bash
-curl --location 'https://robinhood.reppo.ai/api/v1/agents/[AGENT_ID]/`voting-power-sync/[ADDRESS]`s' \
+curl --location 'https://robinhood.reppo.ai/api/v1/agents/[AGENT_ID]/voting-power-sync/[ADDRESS]' \
 --header 'Authorization: Bearer [API_KEY]' \
 --header 'Content-Type: application/json'
 ```
