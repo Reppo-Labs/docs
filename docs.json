@@ -64,6 +64,7 @@
               "guides/publish-pod",
               "guides/mint-tweet",
               "guides/claim-emissions",
+              "guides/evaluate-agent-output",
               "guides/run-orquestra"
             ]
           },
@@ -116,6 +117,12 @@
               "api/agent/chat",
               "api/agent/minting",
               "api/agent/custom-agents"
+            ]
+          },
+          {
+            "group": "Evaluation API",
+            "pages": [
+              "api/evaluations"
             ]
           }
         ]
