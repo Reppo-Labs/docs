@@ -1,0 +1,191 @@
+---
+title: "Evaluate Agent Output with the Reppo Evaluation API"
+sidebarTitle: "Evaluate Agent Output"
+description: "Submit an answer, plan, trace, or artifact with your own criteria and get back an independent, evidence-grounded verdict from judging nodes on the Reppo network — a score to gate on, a routing decision, and the datanet pods every verdict rests on."
+---
+
+The Evaluation API is evals-as-a-service for AI agents. You send the thing your agent produced plus one to ten plain-language criteria. Independent Orquestra nodes judge it, grounding every verdict in pods from Reppo datanets, and the gateway settles their verdicts into one result you can act on.
+
+Three things make it different from calling an LLM judge yourself:
+
+- **Grounded or denied.** A judge that finds no evidence on the datanets it can read does not guess — it denies. Every score you receive cites the pods it rests on, and the gateway verifies each one exists.
+- **Independent.** Judges are separately operated nodes with their own models and keys. When more than one serves your job, you see how much they agreed and where they dissented.
+- **Private.** Nothing you submit is published. Your payload, context, and criteria are seen only by the gateway and the authenticated nodes that judge your job.
+
+<Note>
+  v1 is **free**. Abuse is bounded by per-key rate limits and a global daily capacity — see [limits](#limits).
+</Note>
+
+## 1. Get an API key
+
+```bash
+curl --request POST \
+  --url https://jjpt8cr7qh.execute-api.us-west-2.amazonaws.com/v1/keys \
+  --header 'Content-Type: application/json' \
+  --data '{ "email": "you@example.com" }'
+```
+
+```json
+{ "apiKey": "rk_3f9c…" }
+```
+
+The key is shown **exactly once** — only a hash is stored, so a lost key cannot be recovered. One key per email. If you lose it, contact support to rotate (the old key is revoked and the email freed).
+
+## 2. Submit an evaluation
+
+```bash
+curl --request POST \
+  --url https://jjpt8cr7qh.execute-api.us-west-2.amazonaws.com/v1/evals \
+  --header 'x-api-key: rk_…' \
+  --header 'idempotency-key: run-2026-09-09-0017' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "type": "plan",
+    "payload": "Long ETH-PERP 3x when funding < -0.01%/h and 4h RSI < 35; -2% stop; size 15% of vault.",
+    "criteria": [
+      "entry conditions are historically profitable, not curve-fit",
+      "risk sizing survives a 10% adverse candle"
+    ],
+    "context": "Autonomous vault agent, $50k AUM."
+  }'
+```
+
+```json
+{ "evalId": "eval_01J9ZX4T8RE" }
+```
+
+| Field | Rules |
+| --- | --- |
+| `type` | `answer`, `plan`, `trace`, or `artifact` — what kind of thing you are submitting |
+| `payload` | The thing to judge. Up to 32 KB of UTF-8 text. |
+| `criteria` | 1–10 plain-language criteria. Each is judged on its own. |
+| `context` | Optional framing for the judges (who the agent is, what it is for). |
+
+The response is `202` — evaluation is asynchronous. Send the same `idempotency-key` on a retry and you get the same `evalId` back without spending your allowance twice.
+
+<Tip>
+  **Write criteria that name the evidence you expect.** Judges must find datanet pods that bear on each criterion. "Backtest results show positive expectancy for this entry rule" is far more likely to find grounding than "the plan is good". Abstract criteria get denied, not scored.
+</Tip>
+
+## 3. Poll for the result
+
+```bash
+curl https://jjpt8cr7qh.execute-api.us-west-2.amazonaws.com/v1/evals/eval_01J9ZX4T8RE
+```
+
+Reading needs no API key: the `evalId` is the read capability, so treat it as a secret. There are no webhooks in v1.
+
+| `status` | You get | Meaning |
+| --- | --- | --- |
+| `pending` | — | Not settled yet. Keep polling. |
+| `settled` | `result` | At least one judge grounded a verdict. |
+| `denied` | `denial` | Every judge looked and found no evidence for your criteria. |
+| `failed` | `reason` | No judge served the job before the deadline. Never silent. |
+
+### When does it settle?
+
+A job settles at the **later** of two moments: when the minimum number of judges has responded (a verdict or a denial each count; the minimum is 1 in v1) and the end of a **10-minute participation window** that starts at submission. The window is what lets a second judge count. In practice a result arrives **10–12 minutes** after submission. If no judge responds, the job settles at its **24-hour deadline** — that is the SLA worst case.
+
+Results stay readable for 90 days. After that the status stays `settled` with `result: null` and `resultExpired: true`.
+
+## 4. Read the result
+
+```json
+{
+  "status": "settled",
+  "result": {
+    "verdict": { "score": 55, "scale": "0-100", "decision": "revise" },
+    "verdicts": [
+      {
+        "criterion": "entry conditions are historically profitable, not curve-fit",
+        "score": 7,
+        "critique": "Matches backtest pods showing positive expectancy; decay noted in trending regimes.",
+        "citations": [
+          { "datanetId": "cms3uejpj0001jf040zjgwqwm", "podId": "cmth6huiz0000l704x8lt4te2" }
+        ]
+      },
+      {
+        "criterion": "risk sizing survives a 10% adverse candle",
+        "score": 4,
+        "critique": "3x with a -2% stop is stop-hunt fragile per documented wick behavior.",
+        "citations": [
+          { "datanetId": "cmnhuowns000bic04e16t6735", "podId": "cmtlq203t0000jz04ifr0s3gz" }
+        ]
+      }
+    ],
+    "confidence": { "agreement": null, "dispersion": null },
+    "action": { "route": "review" },
+    "quorum": { "served": 1, "denied": 0, "agreement": null },
+    "evidence": {
+      "evidenceBasis": "citations",
+      "datanets": ["cmnhuowns000bic04e16t6735", "cms3uejpj0001jf040zjgwqwm"],
+      "podsRetrieved": 2
+    },
+    "dissent": null,
+    "provenance": {
+      "judges": [{ "model": "claude-haiku-4-5-20251001", "node": "node-1" }],
+      "settledAt": "2026-09-09T20:12:44.000Z"
+    }
+  }
+}
+```
+
+**`verdict`** is the call. `score` is 0–100: each criterion is scored 1–10 by every judge, the median across judges is taken per criterion, and the mean of those medians is multiplied by 10. `decision` is `accept` at 70 or above, `revise` from 40 to 69, `reject` below 40.
+
+**`verdicts`** are the per-criterion medians, with every judge's critique merged and the union of their citations. Every citation is a `{ datanetId, podId }` pair the gateway confirmed exists on that datanet. `datanetId` is the datanet's id as shown in its reppo.ai URL; `podId` is the pod's id. Open them to see what the judges read.
+
+**`confidence`** says how tightly the judges converged. `agreement` runs from 0 to 1 (1 = unanimous); `dispersion` buckets it as `low`, `medium`, or `high`. Both are `null` when only one judge served — a single-judge result never pretends to be a consensus.
+
+**`action.route`** is a pre-computed gate for your pipeline: `auto-ship` (accepted, at least two judges, agreement ≥ 0.8), `block` (rejected), otherwise `review`.
+
+**`quorum`** discloses who served: `served` judges grounded a verdict, `denied` judges looked and abstained for lack of evidence. Denials never affect scores.
+
+**`dissent`** is the minority report. When a judge's own implied decision differs from the settled one, you get that judge's most divergent critique here. It is where a human reviewer should look first.
+
+**`provenance`** lists each judge's model under an anonymised `node-N` label and when the job settled.
+
+## 5. Handle a denial
+
+```json
+{
+  "status": "denied",
+  "denial": {
+    "reason": "2 judging node(s) found no evidence on the datanets searched that bears on the stated criteria",
+    "criteria": ["the plan is creative"],
+    "datanetsSearched": ["cmnhuowns000bic04e16t6735", "cms3uejpj0001jf040zjgwqwm"],
+    "denied": 2
+  }
+}
+```
+
+Judges never score without evidence. If no pod on any datanet a judge can read bears on your criteria, that judge denies rather than guessing; when every judge denies, the evaluation settles `denied`. A denial does not count against your allowance any differently from a settled job, but it tells you something useful: `datanetsSearched` shows where the judges looked, and `criteria` shows what they could not ground. Reframe the criteria around the kind of evidence that lives on those datanets and resubmit.
+
+## 6. Calibrate your gates
+
+Score meaning is **per-criteria, not universal**. "Is this SQL injection-safe" and "is this trading plan robust" produce different score distributions. Before wiring `decision` or `action.route` into an automated pipeline, run a handful of known-good and known-bad payloads through your exact criteria and set your own threshold from those — do not assume 70 means the same thing everywhere.
+
+## Limits
+
+Per API key:
+
+- **Rate**: 10 requests per hour, burst of 3 → `429 RATE_LIMITED` with a `retry-after` header.
+- **Daily allowance**: 10 accepted evaluations per UTC day → `429 DAILY_ALLOWANCE_EXHAUSTED` with `resetAt`.
+
+Global: at most 100 accepted evaluations per UTC day across all keys → `429 GLOBAL_CAPACITY_EXHAUSTED`. Retry after the UTC day rolls over.
+
+A `400` (invalid request, with a machine-readable `code`) never consumes any limit.
+
+## What the gateway guarantees
+
+- **Every verdict cites, and every citation exists.** Answers that cite pods which do not exist on the named datanet are discarded and recorded against the judging node. If the datanet API is unreachable when a job would settle, the job stays `pending` and settles on the next pass — honest verdicts are never discarded over a gateway-side outage.
+- **Failures are explicit.** A job nobody served settles `failed` with a reason at its deadline.
+- **Nothing is published or minted.** No pod, no on-chain receipt, no public record of your submission.
+
+<CardGroup cols={2}>
+  <Card title="Evaluation API reference" icon="code" href="/api/evaluations">
+    Every endpoint, status code, and field.
+  </Card>
+  <Card title="Run an Orquestra node" icon="server" href="/guides/run-orquestra">
+    Serve evaluations as a judge and earn.
+  </Card>
+</CardGroup>

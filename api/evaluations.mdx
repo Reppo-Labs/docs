@@ -1,0 +1,205 @@
+---
+title: "Evaluation API — Submit and Read Agent Evaluations"
+sidebarTitle: "Evaluations"
+description: "Reference for the Reppo Evaluation API: issue an API key, submit an answer, plan, trace, or artifact with criteria, and poll for the settled, citation-backed verdict."
+---
+
+The Evaluation API is a separate gateway from the Platform and Agent APIs. It has its own base URL and its own key scheme. For a walkthrough see the [Evaluate Agent Output](/guides/evaluate-agent-output) guide.
+
+## Base URL
+
+| Surface | Base URL |
+| --- | --- |
+| Evaluation API | `https://jjpt8cr7qh.execute-api.us-west-2.amazonaws.com/v1` |
+
+All paths below are relative to that base.
+
+## Authentication
+
+| Endpoint | Auth |
+| --- | --- |
+| `POST /keys` | none (rate-limited per source IP) |
+| `POST /evals` | `x-api-key: rk_…` header |
+| `GET /evals/{evalId}` | none — the `evalId` is the read capability |
+
+Keys are issued by `POST /keys`, shown once, and stored only as a hash. A request to `POST /evals` without a valid key gets `401`.
+
+## Error response shape
+
+```json
+{ "code": "RATE_LIMITED", "message": "…" }
+```
+
+`code` is stable and machine-readable; `message` is for humans. `429` responses also carry a `retry-after` header and, for daily caps, a `resetAt` timestamp in the body.
+
+## Issue an API key
+
+`POST /keys`
+
+```bash
+curl --request POST \
+  --url https://jjpt8cr7qh.execute-api.us-west-2.amazonaws.com/v1/keys \
+  --header 'Content-Type: application/json' \
+  --data '{ "email": "you@example.com" }'
+```
+
+```json
+{ "apiKey": "rk_3f9c…" }
+```
+
+| Status | Code | Meaning |
+| --- | --- | --- |
+| `201` | — | Key issued. Shown exactly once. |
+| `400` | `INVALID_EMAIL` | Not a valid email address. |
+| `409` | `EMAIL_ALREADY_REGISTERED` | One key per email. Contact support to rotate. |
+| `429` | — | Issuance is limited per source IP: 2 immediately, then 1 per hour. |
+
+## Submit an evaluation
+
+`POST /evals`
+
+Headers: `x-api-key` (required), `idempotency-key` (optional client token), `Content-Type: application/json`.
+
+```json
+{
+  "type": "plan",
+  "payload": "Long ETH-PERP 3x when funding < -0.01%/h and 4h RSI < 35; -2% stop; size 15% of vault.",
+  "criteria": [
+    "entry conditions are historically profitable, not curve-fit",
+    "risk sizing survives a 10% adverse candle"
+  ],
+  "context": "Autonomous vault agent, $50k AUM."
+}
+```
+
+| Field | Type | Rules |
+| --- | --- | --- |
+| `type` | string | `answer` \| `plan` \| `trace` \| `artifact` |
+| `payload` | string | Required. ≤ 32 KB UTF-8. |
+| `criteria` | string[] | 1–10 non-empty strings. |
+| `context` | string | Optional. |
+
+```json
+{ "evalId": "eval_01J9ZX4T8RE" }
+```
+
+| Status | Code | Meaning |
+| --- | --- | --- |
+| `202` | — | Accepted. Poll `GET /evals/{evalId}`. |
+| `400` | `INVALID_REQUEST` | Body failed validation; `message` names the field. No limit consumed. |
+| `401` | — | Missing, malformed, or unknown key. |
+| `429` | `RATE_LIMITED` | Per-key token bucket: 10/hour, burst 3. Honour `retry-after`. |
+| `429` | `DAILY_ALLOWANCE_EXHAUSTED` | 10 accepted evaluations per key per UTC day. Body carries `resetAt`. |
+| `429` | `GLOBAL_CAPACITY_EXHAUSTED` | 100 accepted evaluations per UTC day across all keys. |
+| `503` | — | Temporarily unable to accept. Retry. |
+
+Repeating a request with the same `idempotency-key` from the same key returns the original `evalId` with `202` and consumes no limits.
+
+## Read an evaluation
+
+`GET /evals/{evalId}`
+
+```bash
+curl https://jjpt8cr7qh.execute-api.us-west-2.amazonaws.com/v1/evals/eval_01J9ZX4T8RE
+```
+
+| Status | Meaning |
+| --- | --- |
+| `200` | Body below, keyed on `status`. |
+| `404` | Unknown `evalId`. |
+
+### `status: "pending"`
+
+```json
+{ "status": "pending" }
+```
+
+Not settled. A job settles at the later of (a) the minimum number of judging nodes responding — one in v1; a verdict or a denial each count — and (b) the end of a 10-minute participation window from submission. A job no node serves settles at its 24-hour deadline. Typical time to result is 10–12 minutes; 24 hours is the SLA ceiling.
+
+### `status: "settled"`
+
+```json
+{
+  "status": "settled",
+  "result": {
+    "verdict": { "score": 75, "scale": "0-100", "decision": "accept" },
+    "verdicts": [
+      {
+        "criterion": "…",
+        "score": 7.5,
+        "critique": "…",
+        "citations": [{ "datanetId": "cms3uejpj0001jf040zjgwqwm", "podId": "cmth6huiz0000l704x8lt4te2" }]
+      }
+    ],
+    "confidence": { "agreement": 0.91, "dispersion": "low" },
+    "action": { "route": "auto-ship" },
+    "quorum": { "served": 3, "denied": 1, "agreement": 0.91 },
+    "evidence": { "evidenceBasis": "citations", "datanets": ["cmnhuowns000bic04e16t6735", "cms3uejpj0001jf040zjgwqwm"], "podsRetrieved": 4 },
+    "dissent": { "node": "node-3", "note": "…" },
+    "provenance": {
+      "judges": [{ "model": "claude-haiku-4-5-20251001", "node": "node-1" }],
+      "settledAt": "2026-08-28T01:00:12.000Z"
+    }
+  }
+}
+```
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `verdict.score` | number | 0–100. Mean of per-criterion medians × 10. |
+| `verdict.decision` | string | `accept` ≥ 70 · `revise` 40–69 · `reject` < 40 |
+| `verdicts[].score` | number | Median of judges' 1–10 scores for that criterion. |
+| `verdicts[].critique` | string | Every judge's critique for that criterion, merged. |
+| `verdicts[].citations[]` | object | `{ datanetId, podId }` — both 25-character cuids. `datanetId` is the datanet's subnet id (as in its reppo.ai URL). Every citation was verified to exist on that datanet. |
+| `confidence.agreement` | number \| null | `1 − meanPairwiseAbsDiff(per-judge overall scores) / 90`. `null` when `served` is 1. |
+| `confidence.dispersion` | string \| null | `low` ≥ 0.85 · `medium` ≥ 0.6 · `high` otherwise. `null` when `served` is 1. |
+| `action.route` | string | `auto-ship` (accept ∧ served ≥ 2 ∧ agreement ≥ 0.8) · `block` (reject) · `review` otherwise. |
+| `quorum.served` | number | Judges whose grounded verdict was included. |
+| `quorum.denied` | number | Judges who looked and abstained for lack of evidence. Not scored. |
+| `evidence.datanets` | string[] | Sorted distinct datanet ids cited by included verdicts. |
+| `evidence.podsRetrieved` | number | Distinct pods cited. |
+| `dissent` | object \| null | The judge whose own implied decision differed from the settled one, with its most divergent critique. |
+| `provenance.judges[]` | object | `{ model, node }` — model id and an anonymised `node-N` label. |
+| `provenance.settledAt` | string | ISO 8601. |
+
+Results are retained for 90 days after settlement. Afterwards:
+
+```json
+{ "status": "settled", "result": null, "resultExpired": true }
+```
+
+### `status: "denied"`
+
+```json
+{
+  "status": "denied",
+  "denial": {
+    "reason": "3 judging node(s) found no evidence on the datanets searched that bears on the stated criteria",
+    "criteria": ["…"],
+    "datanetsSearched": ["cmb7q1r2s000ajk04h9zzq3wd", "cmnhuowns000bic04e16t6735"],
+    "denied": 3
+  }
+}
+```
+
+Every judge that served declined to score for lack of evidence. `datanetsSearched` is the union of datanets the judges looked at; use it with `criteria` to reframe and resubmit.
+
+### `status: "failed"`
+
+```json
+{ "status": "failed", "reason": "no answers by the settlement deadline" }
+```
+
+No judge responded before the deadline. `reason` is always present.
+
+## Guarantees
+
+- A verdict without a citation on every criterion is rejected at the node boundary; "no evidence" is expressed as a denial, never a score.
+- Citations are verified at submission and again at settlement. A verdict whose pod no longer exists is excluded and recorded against the node.
+- A datanet API outage defers settlement; it never discards a verdict.
+- Payload, context, and criteria are never published or minted.
+
+## Changelog
+
+- **Grounded judging.** No pod is minted and no on-chain receipt is returned. Citations are `{ datanetId, podId }` objects. `evidence.evidenceBasis` is always `"citations"`. New `quorum.denied` and new terminal status `denied`.
+- **Datanet ids are subnet cuids.** Every `datanetId` is the datanet's 25-character cuid, not a number.

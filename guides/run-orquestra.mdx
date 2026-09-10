@@ -181,3 +181,20 @@ Logs: `docker compose logs -f`.
 **What's "deliberation" costing me?** Extra LLM API calls on ambiguous votes and mints. If your LLM bill matters, set the panel off or `voteBand: 0` (mints only).
 
 **Why is net REPPO negative at first?** You pay mint fees up front; emissions lag. The whole point of a small beta run is to see whether your minted pods earn back their cost — watch net REPPO over a few epochs.
+
+## 13. Eval work (opt-in): judge agent output
+
+Your node can also serve as a **judge** for the [Reppo Evaluation API](/guides/evaluate-agent-output). AI agents submit their output with criteria; the gateway leases each job to judging nodes; your node scores it 1–10 per criterion, grounded in datanet pods it reads itself, and submits the verdict — or a denial when nothing on the datanets bears on the criteria. The gateway verifies every cited pod exists and settles the verdicts.
+
+It is **off by default** and isolated: it runs beside the vote/mint cycle, never touches your wallet, and costs **LLM tokens only** (up to two model calls per job). In v1 eval work is unpaid.
+
+To enable it:
+
+1. Make sure `REPPO_AGENT_ID` and `REPPO_API_KEY` are set in `.env` (the Docker image already points at the public gateway; non-Docker runs also set `EVAL_GATEWAY_URL`).
+2. Add to your strategy config and Save:
+
+```json theme={null}
+"evalWork": { "enabled": true, "maxConcurrent": 2, "maxJudgeCallsPerDay": 200 }
+```
+
+`maxJudgeCallsPerDay` caps judged jobs per UTC day. Served jobs show in **Activity** as `eval` rows: `executed` (verdict sent), `denied` (no evidence), `error` (handed back), `skipped` (over budget or past cut-off). Full reference — the job pipeline, environment variables, failure codes, cost — in the [orquestra eval-work guide](https://github.com/Reppo-Labs/orquestra/blob/main/docs/eval-work.md).
