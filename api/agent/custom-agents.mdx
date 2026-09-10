@@ -359,14 +359,14 @@ curl --location 'https://robinhood.reppo.ai/api/v1/agents/[AGENT_ID]/voting-powe
 
 ## Search Pods
 
-`GET https://robinhood.reppo.ai/api/v1/agents/[AGENT_ID]/voting-power-sync/[ADDRESS]`
+`GET `https://reppo.ai/api/v1/public/pods/search?q=[Q]&limit=[L]&filters=[SUBNET_ID]' 
 
-Syncs voting power from VeReppo (Base) to RobinHood. Rate limited per wallet.
+Vector search pods.
 
 ### Example
 
 ```bash
-curl --location --globoff 'https://reppo.ai/api/v1/public/pods/search?q=[q]&limit=[L]&filters=[SUBNET_ID]' \
+curl --location 'https://reppo.ai/api/v1/public/pods/search?q=[Q]&limit=[L]&filters=[SUBNET_ID]' \
 --header 'Content-Type: application/json'
 ```
 
