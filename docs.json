@@ -46,7 +46,8 @@
               "concepts/votes-curation",
               "concepts/staking-emissions",
               "concepts/evof",
-              "concepts/orquestra"
+              "concepts/orquestra",
+              "concepts/evaluation-api"
             ]
           },
           {
@@ -116,6 +117,14 @@
               "api/agent/chat",
               "api/agent/minting",
               "api/agent/custom-agents"
+            ]
+          },
+          {
+            "group": "Evaluation API",
+            "pages": [
+              "api/eval/overview",
+              "api/eval/evaluations",
+              "api/eval/peer-assessments"
             ]
           }
         ]

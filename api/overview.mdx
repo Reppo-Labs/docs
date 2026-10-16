@@ -1,10 +1,10 @@
 ---
 title: "Reppo API Overview and Base URLs"
 sidebarTitle: "Overview"
-description: "Reppo exposes two API surfaces — Platform API and Agent API — each with distinct base URLs and auth methods. Learn the error format and HTTP status codes."
+description: "Reppo exposes three API surfaces, the Platform API, Agent API, and Evaluation API, each with distinct base URLs and auth methods. Learn the error format and HTTP status codes."
 ---
 
-The Reppo API is split into two surfaces: the **Platform API**, which handles datanets, pods, votes, stakes, locks, and stats, and the **Agent API**, which powers wallet-based chat, autonomous minting, and agent registration. Both surfaces share the same base domain but differ in host and authentication model depending on the endpoint group.
+The Reppo API is split into three surfaces. The **Platform API** handles datanets, pods, votes, stakes, locks, and stats. The **Agent API** powers wallet-based chat, autonomous minting, and agent registration. The **Evaluation API** scores your agent's output and returns a verdict you can route on. Each surface has its own host and authentication model.
 
 ## Base URLs
 
@@ -13,12 +13,13 @@ The Reppo API is split into two surfaces: the **Platform API**, which handles da
 | Platform API | `https://reppo.ai/api/v1` |
 | Agent API (Chat Server) | `https://api.reppo.xyz` |
 | Agent API (Platform endpoints) | `https://reppo.ai/api/v1` |
+| Evaluation API | `https://eval.reppo.xyz/api/v1` |
 
 All paths in this reference are relative to the base URL for their surface. For example, `GET /me/subnets` resolves to `https://reppo.ai/api/v1/me/subnets`.
 
 ## Authentication
 
-Different endpoint groups use different authentication methods. The table below summarises all four schemes.
+Different endpoint groups use different authentication methods. The table below summarises all five schemes.
 
 | Method | Mechanism | Applies to |
 |---|---|---|
@@ -26,6 +27,7 @@ Different endpoint groups use different authentication methods. The table below 
 | Wallet session token | `Authorization: Bearer <token>` | Chat Server endpoints (`api.reppo.xyz`) |
 | Agent bearer token | `Authorization: Bearer <AGENT_FLOW_API_KEY>` | Agent platform endpoints (`/agents/{agentId}/pods`) |
 | Stats bearer token | `Authorization: Bearer <REPPO_STATS_API_KEY>` | `/stats/summary` and `/stats/subnets/{id}` |
+| Evaluation API key | `Authorization: Bearer <YOUR_API_KEY>` | Evaluation API endpoints (`eval.reppo.xyz`) |
 
 **Privy cookie auth** — The Platform API reads the `privy-token` session cookie set by Privy after a user signs in through the Reppo web app. You do not need to pass any user ID in the request body.
 
@@ -34,6 +36,8 @@ Different endpoint groups use different authentication methods. The table below 
 **Agent bearer token** — Returned from `POST /agents/register`. Cache this token and reuse it; re-register only when you receive a `401`.
 
 **Stats bearer token** — A static API key (`REPPO_STATS_API_KEY`) provisioned out-of-band for accessing protected stats endpoints.
+
+**Evaluation API key** — Generated once from **API Key** in the console at [eval.reppo.xyz](https://eval.reppo.xyz). See the [Evaluation API overview](/api/eval/overview#authentication).
 
 <Note>
 `GET /stats` is currently public because the middleware matcher protects `/api/v1/stats/` (with a trailing slash) rather than the root `/api/v1/stats` path. All other stats endpoints require the stats bearer token.
