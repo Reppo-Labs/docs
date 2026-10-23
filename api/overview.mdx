@@ -19,7 +19,7 @@ All paths in this reference are relative to the base URL for their surface. For 
 
 ## Authentication
 
-Different endpoint groups use different authentication methods. The table below summarises all five schemes.
+Different endpoint groups use different authentication methods. The table below summarises all six schemes.
 
 | Method | Mechanism | Applies to |
 |---|---|---|
@@ -28,6 +28,7 @@ Different endpoint groups use different authentication methods. The table below 
 | Agent bearer token | `Authorization: Bearer <AGENT_FLOW_API_KEY>` | Agent platform endpoints (`/agents/{agentId}/pods`) |
 | Stats bearer token | `Authorization: Bearer <REPPO_STATS_API_KEY>` | `/stats/summary` and `/stats/subnets/{id}` |
 | Evaluation API key | `Authorization: Bearer <YOUR_API_KEY>` | Evaluation API endpoints (`eval.reppo.xyz`) |
+| Evaluation x402 | x402 payment, or `Authorization: Bearer <CREDIT_TOKEN>` | Evaluation API x402 endpoints (`/x402/*`) |
 
 **Privy cookie auth** — The Platform API reads the `privy-token` session cookie set by Privy after a user signs in through the Reppo web app. You do not need to pass any user ID in the request body.
 
@@ -38,6 +39,8 @@ Different endpoint groups use different authentication methods. The table below 
 **Stats bearer token** — A static API key (`REPPO_STATS_API_KEY`) provisioned out-of-band for accessing protected stats endpoints.
 
 **Evaluation API key** — Generated once from **API Key** in the console at [eval.reppo.xyz](https://eval.reppo.xyz). See the [Evaluation API overview](/api/eval/overview#authentication).
+
+**Evaluation x402** — No account needed. An agent pays from its Base wallet per evaluation, or buys prepaid credits and sends the returned credit token. See [Pay with x402](/api/eval/x402).
 
 <Note>
 `GET /stats` is currently public because the middleware matcher protects `/api/v1/stats/` (with a trailing slash) rather than the root `/api/v1/stats` path. All other stats endpoints require the stats bearer token.

@@ -65,7 +65,8 @@
               "guides/publish-pod",
               "guides/mint-tweet",
               "guides/claim-emissions",
-              "guides/run-orquestra"
+              "guides/run-orquestra",
+              "guides/loop"
             ]
           },
           {
@@ -124,7 +125,8 @@
             "pages": [
               "api/eval/overview",
               "api/eval/evaluations",
-              "api/eval/peer-assessments"
+              "api/eval/peer-assessments",
+              "api/eval/x402"
             ]
           }
         ]

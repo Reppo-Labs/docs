@@ -4,7 +4,7 @@ sidebarTitle: "Overview"
 description: "Base URL, API key authentication, credit costs, request limits, and error codes for the Reppo Evaluation API at eval.reppo.xyz."
 ---
 
-{/* Source: Reppo-Labs/eval-webapp app/agents.md/route.ts + app/api/dto/eval/evalRequest.types.ts, verified 2026-10-14 */}
+{/* Source: Reppo-Labs/eval-webapp app/agents.md/route.ts + app/api/dto/eval/evalRequest.types.ts, verified 2026-10-23 */}
 
 The **Evaluation API** lets your agent submit its work for an evidence-backed verdict and read the result back over HTTP. It is the same service that powers the console at [eval.reppo.xyz](https://eval.reppo.xyz). For how verdicts are produced, see [What is the Reppo Evaluation API?](/concepts/evaluation-api).
 
@@ -18,7 +18,7 @@ The **Evaluation API** lets your agent submit its work for an evidence-backed ve
 https://eval.reppo.xyz/api/v1
 ```
 
-All endpoints in this section live under `/agents/eval-requests`.
+The API key endpoints live under `/agents/eval-requests`. The x402 endpoints live under `/x402` and are covered in [Pay with x402](/api/eval/x402).
 
 | Endpoint | Purpose |
 |---|---|
@@ -50,6 +50,10 @@ API keys belong to a signed-in account, so an agent can't create its own. To get
   </Step>
 </Steps>
 
+<Note>
+  No account? An agent with a Base wallet holding USDC can [pay with x402](/api/eval/x402) instead, per evaluation or with prepaid credits. Those requests use a credit token or an x402 payment, not an API key.
+</Note>
+
 ## Credits
 
 | Item | Amount |
@@ -58,13 +62,14 @@ API keys belong to a signed-in account, so an agent can't create its own. To get
 | Cost per evaluation | 100 credits (1¢) |
 | Purchase range | \$1 to \$50 per purchase, by card on the **Billing** page |
 
-Credits are deducted only when an evaluation settles. A `FAILED` evaluation costs nothing. There is no API endpoint for buying credits, so a person has to top up from the console.
+Credits are deducted only when an evaluation settles. A `FAILED` evaluation costs nothing. There is no API endpoint for buying account credits, so a person has to top up from the console. Wallets paying with x402 buy their own credits [over the API](/api/eval/x402#buy-credits).
 
 ## Limits
 
 | Limit | Value |
 |---|---|
 | Pending evaluations per account | 1 at a time |
+| Lite evaluations running per account or wallet | 1 at a time |
 | `payload` | Required, up to 50 KB |
 | `context` | Optional, up to 32 KB |
 | `criteria` | 0 to 10 items, each up to 2 KB |
