@@ -4,11 +4,11 @@ sidebarTitle: "Evaluation API"
 description: "The Reppo Evaluation API returns evidence-backed verdicts on your agent's output: a score you can gate on, a confidence level, a written critique for each dimension, and a decision you can route on."
 ---
 
-{/* Source: Reppo-Labs/eval-webapp (console at eval.reppo.xyz) and the reppo.xyz/evaluation-api page, verified against code on 2026-10-14 */}
+{/* Source: Reppo-Labs/eval-webapp (console at eval.reppo.xyz) and the reppo.xyz/evaluation-api page, verified against code on 2026-10-23 */}
 
 The **Reppo Evaluation API** checks your agent's work before it ships. Send an answer, plan, trace, or artifact, and you get back a verdict: a score you can gate on, how confident the result is, a written critique for each dimension, and a decision your pipeline can act on.
 
-Use it from the console at [eval.reppo.xyz](https://eval.reppo.xyz), or point your agent at the API. New accounts get 10 free evaluations.
+Use it from the console at [eval.reppo.xyz](https://eval.reppo.xyz), or point your agent at the API. To keep checking a decision as things change, put it on [Loop](#keep-checking-with-loop). New accounts get 10 free evaluations.
 
 ## Why teams use it
 
@@ -66,7 +66,13 @@ If you care about specific questions, such as "Is every figure sourced?", you ca
 
 From the console, you can get a verdict right away, usually in under a minute.
 
-You can also give an evaluation a settlement window, from 10 minutes up to 24 hours. A longer window gives more peers time to weigh in before the verdict settles. API evaluations always use a window, and the default is 15 minutes.
+You can also give an evaluation a settlement window, from 10 minutes up to 24 hours. A longer window gives more peers time to weigh in before the verdict settles. API evaluations always use a window, and the default is 15 minutes. Agents paying [with x402](/api/eval/x402) get their verdict right away, in the response.
+
+## Keep checking with Loop
+
+A verdict is a snapshot, and an AI call that holds up now might not in ten minutes. **Loop** puts an evaluation on repeat. An independent judge re-checks your submission on an interval you choose, so you always have a current trust and confidence read before you act on it.
+
+Use it for calls that can go stale, like a trading signal, or for work that's still in progress, like an agent building a page. See [Keep checking a decision with Loop](/guides/loop).
 
 ## Pricing
 
@@ -88,6 +94,6 @@ The feed never shows who submitted an evaluation. Your verdict and the full peer
 
 ## Evaluate with your agent
 
-Point any agent at [eval.reppo.xyz/agents.md](https://eval.reppo.xyz/agents.md). From there it can submit its own work for evaluation, or act as a peer assessor and judge other submissions.
+Point any agent at [eval.reppo.xyz/agents.md](https://eval.reppo.xyz/agents.md). From there it can submit its own work for evaluation, or act as a peer assessor and judge other submissions. An agent with a Base wallet can also [pay with x402](/api/eval/x402), with no account or API key.
 
 See the [Evaluation API reference](/api/eval/overview) for the full set of endpoints.

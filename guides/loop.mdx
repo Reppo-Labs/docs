@@ -1,0 +1,98 @@
+---
+title: "Keep Checking a Decision with Loop"
+sidebarTitle: "Loop an Evaluation"
+description: "Loop puts a Reppo evaluation on repeat, so an independent judge keeps re-checking an AI answer and you always have a current trust and confidence read before you act. Run it from the eval console or from your agent."
+---
+
+{/* Source: Reppo-Labs/eval-webapp app/loop/** + app/agents.md/route.ts section 9, verified 2026-10-23 */}
+
+Don't trust an AI answer once and move on. A call that looks right now can be wrong ten minutes from now. **Loop** keeps checking it while it still matters.
+
+Loop puts an evaluation on repeat. An independent judge re-checks your submission on an interval you choose, and each new verdict lands as it comes in. You get a live trust and confidence read on the decision, so you're never acting on a stale verdict.
+
+<Note>
+  Loop is in public beta. Try it at [eval.reppo.xyz/loop](https://eval.reppo.xyz/loop).
+</Note>
+
+## When to use it
+
+**A trading call.** ChatGPT tells you BTC is about to drop. Put that call on Loop and watch the verdict. If the judge keeps coming back with `reject`, you know not to act on it.
+
+**AI building something for you.** When an agent is writing code or designing a page, keep a running check on whether the work still meets the goal you set.
+
+**An agent's own decisions.** Let your agent re-check its plan or signal on a timer and act only while the verdict holds.
+
+## Run a loop in the console
+
+<Steps>
+  <Step title="Open Loop">
+    Sign in at [eval.reppo.xyz](https://eval.reppo.xyz) and click **Loop** in the sidebar.
+  </Step>
+  <Step title="Describe what to judge">
+    Pick the submission type and paste the AI output you want checked. Add context, such as who it's for and what it's meant to do. Add criteria if you care about specific questions. [Better context gets sharper verdicts.](/concepts/evaluation-api#getting-better-verdicts)
+  </Step>
+  <Step title="Pick how often it runs">
+    Under **Run every**, choose how often the judge re-checks, as often as every minute.
+  </Step>
+  <Step title="Start the loop">
+    Click **Start loop**. The first verdict comes back right away. A timer shows when the next run starts, and each verdict stacks on the page with its score, decision, and confidence. Open **Scorecard & evidence** on any run for the full breakdown, or **View details** to see it in **My Evaluations**.
+  </Step>
+  <Step title="Stop when you're done">
+    Click **Stop loop**. Keep the page open while it runs, because the loop stops when you leave.
+  </Step>
+</Steps>
+
+The submission is locked while the loop runs, so every verdict judges the same thing. To change it, stop the loop, edit, and start again. Loop takes text submissions only, without attachments.
+
+<Warning>
+  Evaluations are public for now. Your submission and every verdict appear on the network feed at [eval.reppo.xyz/evals](https://eval.reppo.xyz/evals). Don't loop confidential material.
+</Warning>
+
+## What it costs
+
+Each run is one [lite evaluation](/api/eval/x402), charged at 100 credits (1¢). A run is only charged if a verdict comes back. Your credit balance is shown at the top of the Loop page.
+
+## Run a loop from your agent
+
+There's no separate loop endpoint. Your agent runs the loop itself by calling the [lite evaluation endpoint](/api/eval/x402#run-a-lite-evaluation) on a timer, paying with [prepaid credits](/api/eval/x402#prepaid-credits) or per request over x402.
+
+<Steps>
+  <Step title="Test it free in sandbox mode">
+    Add a `Sandbox: true` header to the lite request. Every run returns a placeholder verdict and nothing is charged. See [sandbox mode](/api/eval/x402#test-for-free-in-sandbox-mode).
+  </Step>
+  <Step title="Send the lite request">
+    `POST https://eval.reppo.xyz/api/v1/x402/evals/lite` with your credit token. The verdict is in the response.
+  </Step>
+  <Step title="Wait, then repeat">
+    Record the verdict, sleep for your interval, and send the same request again.
+  </Step>
+</Steps>
+
+```bash
+INTERVAL_MINUTES=5
+MAX_RUNS=12
+
+for run in $(seq 1 "$MAX_RUNS"); do
+  status=$(curl -sS -o "run-$run.json" -w '%{http_code}' \
+    -X POST "https://eval.reppo.xyz/api/v1/x402/evals/lite" \
+    -H "Authorization: Bearer $REPPO_CREDIT_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{"type":"answer","payload":"The model output you want evaluated","criteria":["Is the answer factually correct?"]}')
+  echo "run $run: HTTP $status"
+  case "$status" in
+    201|502) ;;   # verdict saved in run-N.json, or a failed run that wasn't charged
+    *) break ;;   # 400, 401, 402, 409 - stop and look at run-N.json
+  esac
+  [ "$run" -lt "$MAX_RUNS" ] && sleep $((INTERVAL_MINUTES * 60))
+done
+```
+
+Follow these rules so the loop stays cheap and predictable:
+
+- **One run at a time.** Start the next run only after the previous one returns. A wallet can have one lite evaluation running at a time, and overlapping runs get `409`.
+- **Set a run limit.** Every run is charged, and nothing stops the loop for you.
+- **Stop on `400`, `401`, or `402`.** That's a bad body, a bad token, or no credits left. A `502` cost nothing, so it's safe to carry on at the next run.
+
+<Tip>
+  Using an [API key](/api/eval/overview#authentication) instead of x402? Lite evaluations aren't available with an API key, so loop the [standard submit](/api/eval/evaluations#submit-an-evaluation) instead: submit, poll until the status leaves `PENDING`, wait your interval, then submit again. Each run takes at least its settlement window.
+</Tip>

@@ -1,0 +1,188 @@
+---
+title: "Pay for Evaluations with x402 — Evaluation API"
+sidebarTitle: "Pay with x402"
+description: "Let an agent pay for Reppo evaluations from its own Base wallet over x402, with no account or API key. Pay per evaluation or buy prepaid credits, test for free in sandbox mode, and read results back."
+---
+
+{/* Source: Reppo-Labs/eval-webapp lib/x402AgentDocs.ts + app/api/v1/x402/**, verified 2026-10-23 */}
+
+An agent with its own wallet can skip the Reppo account and API key entirely. It pays 1¢ in USDC on Base for each evaluation, using the [x402](https://x402.org) HTTP payment protocol. To avoid paying on every request, the wallet can also [buy credits in bulk](#prepaid-credits) and spend them with a credit token.
+
+These are **lite** evaluations. They're judged right away and the verdict comes back in the response, with no settlement window and no peer assessments.
+
+<Tip>
+  Point your agent at [eval.reppo.xyz/x402.md](https://eval.reppo.xyz/x402.md). It's a plain-Markdown version of this page meant to go straight into an agent's context.
+</Tip>
+
+| Endpoint | Purpose | Auth |
+|---|---|---|
+| `POST /x402/evals/lite` | [Run a lite evaluation](#run-a-lite-evaluation) | x402 payment, credit token, or `Sandbox: true` |
+| `GET /x402/evals/{evalId}` | [Read an evaluation back](#read-an-evaluation-back) | Read token or credit token |
+| `POST /x402/credits?usd=AMOUNT` | [Buy credits](#buy-credits) | x402 payment |
+| `GET /x402/credits` | [Check your balance](#check-your-balance) | Credit token |
+
+All paths use the base URL `https://eval.reppo.xyz/api/v1`.
+
+## Run a lite evaluation
+
+`POST https://eval.reppo.xyz/api/v1/x402/evals/lite`
+
+The request body is the same as a [standard submission](/api/eval/evaluations#request-body), with two differences: `attachments` aren't supported yet, and `settlementMinutes` is ignored.
+
+### How payment works
+
+<Steps>
+  <Step title="Send the request with no payment">
+    You get `402 Payment Required`. The payment terms (price, network, asset, and `payTo`) are base64-encoded in the `PAYMENT-REQUIRED` response header.
+  </Step>
+  <Step title="Sign and resend">
+    Sign a payment for those terms with your wallet. Resend the identical request with it in the `PAYMENT-SIGNATURE` header.
+  </Step>
+  <Step title="Get your verdict">
+    The evaluation is judged inline, so allow up to about 2 minutes. The payment is only collected if you get a `2xx` back. Any error leaves your wallet untouched.
+  </Step>
+</Steps>
+
+Don't build the payment by hand. An x402 client does the first two steps for you:
+
+```ts
+import { wrapAxiosWithPayment, x402Client } from "@x402/axios";
+import { registerExactEvmScheme } from "@x402/evm/exact/client";
+import axios from "axios";
+import { privateKeyToAccount } from "viem/accounts";
+
+const client = new x402Client();
+registerExactEvmScheme(client, { signer: privateKeyToAccount(process.env.WALLET_PRIVATE_KEY) });
+const api = wrapAxiosWithPayment(axios.create(), client);
+
+const { data } = await api.post("https://eval.reppo.xyz/api/v1/x402/evals/lite", {
+  type: "answer",
+  payload: "The model output you want evaluated",
+  criteria: ["Is the answer factually correct?"],
+});
+// data.result is the verdict. Keep data.evalId and data.readToken.
+```
+
+The wallet only needs USDC on Base. It doesn't need ETH, because the payment is a signed authorization and the facilitator pays the gas.
+
+### Response — `201 Created`
+
+The same shape as [reading an evaluation result](/api/eval/evaluations#read-an-evaluation-result). `status` is `SETTLED` and `result` holds the verdict. It also includes:
+
+<ResponseField name="readToken" type="string">
+  Starts with `x402rt_`. It's shown **once** and it's your only way to read this evaluation again, since there's no account behind it.
+</ResponseField>
+
+The `PAYMENT-RESPONSE` header carries the settlement receipt, including the transaction hash.
+
+### Errors
+
+| Status | Cause |
+|---|---|
+| `400` | The body failed validation, or it included `attachments` |
+| `402` | No payment, an invalid or expired payment, or settlement failed. The verdict isn't returned, and you can retry with a new payment. |
+| `409` | This wallet already has a lite evaluation running, or the payment authorization was already used |
+| `502` | The evaluation couldn't be completed. The payment wasn't collected. |
+| `503` | x402 payments are temporarily unavailable. Try again later, or pay with [prepaid credits](#prepaid-credits). |
+| `500` | Unexpected server error |
+
+## Test for free in sandbox mode
+
+Add a `Sandbox: true` header to test your integration without paying. You don't need a payment, credit token, or wallet, and nothing is charged.
+
+```bash
+curl -X POST "https://eval.reppo.xyz/api/v1/x402/evals/lite" \
+  -H "Sandbox: true" \
+  -H "Content-Type: application/json" \
+  -d '{"type":"answer","payload":"The model output you want evaluated","criteria":["Is the answer factually correct?"]}'
+```
+
+The body is validated exactly like a real request, so you get the same `400`s. The response is the same `201` shape with `"sandbox": true` added.
+
+No judge runs. `result` is a placeholder (score `0`, decision `revise`) with one entry in `verdicts` per criterion, each saying sandbox mode is on. Sandbox evaluations aren't saved, so the `evalId` and `readToken` can't be read back and they never appear in the public feed. Each sandbox call is logged for usage stats: the type, the criteria, and the first 500 characters of `payload`.
+
+Drop the header to run a real, paid evaluation.
+
+## Prepaid credits
+
+Instead of paying for every evaluation, a wallet can buy credits in bulk with one x402 payment. It then spends them on lite evaluations with a credit token, with no payment per request.
+
+| Item | Amount |
+|---|---|
+| Cost per evaluation | 100 credits (1¢) |
+| Exchange rate | 1 USDC = 10,000 credits (100 evaluations) |
+| Purchase range | 1 to 100 USDC, in whole dollars |
+
+### Buy credits
+
+`POST https://eval.reppo.xyz/api/v1/x402/credits?usd=AMOUNT`
+
+There's no request body. It's paid with the same x402 flow, so use the same client:
+
+```ts
+const { data } = await api.post("https://eval.reppo.xyz/api/v1/x402/credits?usd=5");
+// First purchase for this wallet: save data.creditToken. It's shown once.
+```
+
+```json
+{
+  "walletAddress": "0x...",
+  "creditsPurchased": 50000,
+  "creditToken": "x402ck_..."
+}
+```
+
+- `creditToken` is returned **once**, on the wallet's first purchase. Store it as a secret, because anyone holding it can spend the wallet's credits.
+- Later purchases are top-ups. Credits are added, the same token keeps working, and the response has no `creditToken`.
+- Lost the token? Buy again with `&newKey=true`, for any amount. You get a new token, the old one stops working, and your balance is kept.
+- Credits, and any new token, take effect once the payment settles. If settlement fails, nothing changes.
+
+### Evaluate with credits
+
+Send the same lite request with the credit token instead of a payment:
+
+```bash
+curl -X POST "https://eval.reppo.xyz/api/v1/x402/evals/lite" \
+  -H "Authorization: Bearer YOUR_CREDIT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"type":"answer","payload":"The model output you want evaluated","criteria":["Is the answer factually correct?"]}'
+```
+
+The response is the same evaluation shape, with `creditBalance` (your balance after this evaluation) instead of `readToken`. Credits are only charged when the verdict comes back, so a failed evaluation costs nothing.
+
+### Check your balance
+
+`GET https://eval.reppo.xyz/api/v1/x402/credits`
+
+```bash
+curl "https://eval.reppo.xyz/api/v1/x402/credits" \
+  -H "Authorization: Bearer YOUR_CREDIT_TOKEN"
+```
+
+```json
+{ "walletAddress": "0x...", "balance": 49900 }
+```
+
+### Credit errors
+
+| Status | Cause |
+|---|---|
+| `400` | Buying: `usd` is missing, not a whole number, or outside 1 to 100. Evaluating: the body failed validation, or it included `attachments`. |
+| `401` | The credit token is wrong, or it was replaced by a `newKey=true` purchase |
+| `402` | Buying: no payment, an invalid payment, or settlement failed. Evaluating: not enough credits, so buy more. |
+| `409` | Buying: the payment authorization was already used. Evaluating: this wallet already has a lite evaluation running. |
+| `502` | The evaluation couldn't be completed. No credits were charged. |
+| `503` | x402 payments are temporarily unavailable (buying only) |
+
+## Read an evaluation back
+
+`GET https://eval.reppo.xyz/api/v1/x402/evals/{evalId}`
+
+Free to call. Authenticate with the `readToken` from a pay-per-evaluation request, or with your credit token for evaluations paid from credits.
+
+```bash
+curl "https://eval.reppo.xyz/api/v1/x402/evals/YOUR_EVAL_ID" \
+  -H "Authorization: Bearer YOUR_READ_TOKEN"
+```
+
+The response matches [reading an evaluation result](/api/eval/evaluations#read-an-evaluation-result). A missing token returns `401`. A wrong token or an unknown `evalId` returns `404`.
