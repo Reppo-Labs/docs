@@ -4,9 +4,9 @@ sidebarTitle: "Overview"
 description: "Base URL, API key authentication, credit costs, request limits, and error codes for the Reppo Evaluation API at eval.reppo.xyz."
 ---
 
-{/* Source: Reppo-Labs/eval-webapp app/agents.md/route.ts + app/api/dto/eval/evalRequest.types.ts, verified 2026-10-14 */}
+{/* Source: Reppo-Labs/eval-webapp app/agents.md/route.ts, as served at https://eval.reppo.xyz/agents.md; checked against the live file on 2026-11-12 */}
 
-The **Evaluation API** lets your agent submit its work for an evidence-backed verdict and read the result back over HTTP. It is the same service that powers the console at [eval.reppo.xyz](https://eval.reppo.xyz). For how verdicts are produced, see [What is the Reppo Evaluation API?](/concepts/evaluation-api).
+The **Evaluation API** lets your agent submit its work for a verdict and read the result back over HTTP. It is the same service that powers the console at [eval.reppo.xyz](https://eval.reppo.xyz). For how verdicts are produced, see [What is the Reppo Evaluation API?](/concepts/evaluation-api).
 
 <Tip>
   Building with a coding agent? Point it at [eval.reppo.xyz/agents.md](https://eval.reppo.xyz/agents.md). It's a plain-Markdown version of this reference meant to go straight into an agent's context.
@@ -18,15 +18,13 @@ The **Evaluation API** lets your agent submit its work for an evidence-backed ve
 https://eval.reppo.xyz/api/v1
 ```
 
-All endpoints in this section live under `/agents/eval-requests`.
+All API key endpoints in this section live under `/agents/evals`.
 
 | Endpoint | Purpose |
 |---|---|
-| `POST /agents/eval-requests/submit` | [Submit an evaluation](/api/eval/evaluations#submit-an-evaluation) |
-| `GET /agents/eval-requests/{evalId}` | [Read an evaluation result](/api/eval/evaluations#read-an-evaluation-result) |
-| `POST /agents/eval-requests/attachments` | [Request an attachment upload URL](/api/eval/evaluations#submit-with-an-attachment) |
-| `GET /agents/eval-requests/pending` | [List pending evaluations to assess](/api/eval/peer-assessments#list-pending-evaluations) |
-| `POST /agents/eval-requests/{evalId}/assessments` | [Submit a peer assessment](/api/eval/peer-assessments#submit-a-peer-assessment) |
+| `POST /agents/evals` | [Submit an evaluation](/api/eval/evaluations#submit-an-evaluation) |
+| `GET /agents/evals/{id}` | [Read an evaluation result](/api/eval/evaluations#read-an-evaluation-result) |
+| `POST /agents/evals/attachments` | [Request an attachment upload URL](/api/eval/evaluations#submit-with-an-attachment) |
 
 ## Authentication
 
@@ -54,49 +52,38 @@ API keys belong to a signed-in account, so an agent can't create its own. To get
 
 | Item | Amount |
 |---|---|
-| Sign-up bonus | 1,000 credits (10 evaluations) |
-| Cost per evaluation | 100 credits (1¢) |
-| Purchase range | \$1 to \$50 per purchase, by card on the **Billing** page |
+| Sign-up bonus | 22,000 credits, one time |
+| Text-only evaluation | 440 credits (50 evaluations from the sign-up bonus alone) |
+| Evaluation with an image or PDF attached | 1,000 credits |
 
-Credits are deducted only when an evaluation settles. A `FAILED` evaluation costs nothing. There is no API endpoint for buying credits, so a person has to top up from the console.
+Credits are charged only once the evaluation is `COMPLETED`. A `FAILED` evaluation costs nothing. There is no API endpoint for buying account credits, so a person has to buy more on the [Billing](https://eval.reppo.xyz/billing) page.
+
+You can have several evaluations in flight at once. Each one reserves its price against your balance until it finishes, so submitting several needs enough credits to cover all of them.
 
 ## Limits
 
 | Limit | Value |
 |---|---|
-| Pending evaluations per account | 1 at a time |
-| `payload` | Required, up to 50 KB |
-| `context` | Optional, up to 32 KB |
-| `criteria` | 0 to 10 items, each up to 2 KB |
-| Attachments | 1 per evaluation, up to 2 MB: PNG, JPEG, WebP, or PDF |
-| Settlement window | 10, 15, 30, 60, 120, 360, 720, or 1440 minutes (default 15) |
-| Peer assessments per evaluation | 3 |
+| `taskType` | Required: `claim`, `response`, or `action` |
+| `input` | Required, non-empty, up to 50 KB |
+| Attachments | Up to 1 per evaluation, 1.25 MB: PNG, JPEG, WebP, or PDF |
 
 ## Evaluation statuses
 
 | Status | Meaning |
 |---|---|
-| `PENDING` | Waiting for the settlement window to close |
-| `SETTLED` | Judged. `result` holds the verdict and credits were charged. |
-| `FAILED` | Judging failed. `result.reason` explains why and nothing was charged. |
-| `DENIED` | Reserved. The API doesn't currently return this status. |
+| `QUEUED` | Accepted and waiting to be scored. No result yet. |
+| `PROCESSING` | Being scored by the panel of evaluators. |
+| `COMPLETED` | Scored. `result` holds the verdict and credits were charged. |
+| `FAILED` | The evaluation could not be completed. Nothing was charged. Submit it again. |
 
 ## Errors
 
-Errors use the same envelope as the rest of the Reppo API:
-
-```json
-{
-  "error": "A human-readable error message"
-}
-```
-
 | Code | Meaning |
 |---|---|
-| `400` | The request body or query failed validation |
+| `400` | The request body failed validation, or an attachment is missing or too large |
 | `401` | Missing or invalid API key |
-| `402` | Not enough credits for an evaluation |
-| `403` | Not allowed, such as assessing your own evaluation |
-| `404` | No evaluation with that `evalId`. When reading a result, this also covers evaluations owned by another account. |
-| `409` | Conflicts with current state, such as a second pending evaluation |
+| `402` | Not enough credits: 440 for a text-only evaluation, 1,000 with an attachment |
+| `404` | No evaluation with that `id`, or it belongs to a different account |
 | `500` | Unexpected server error |
+| `502` | The evaluation couldn't be queued. It's returned as `FAILED` and not charged, so try again. |

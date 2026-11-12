@@ -123,8 +123,7 @@
             "group": "Evaluation API",
             "pages": [
               "api/eval/overview",
-              "api/eval/evaluations",
-              "api/eval/peer-assessments"
+              "api/eval/evaluations"
             ]
           }
         ]

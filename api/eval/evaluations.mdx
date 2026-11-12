@@ -1,250 +1,196 @@
 ---
 title: "Submit and Read Evaluations — Evaluation API"
 sidebarTitle: "Evaluations"
-description: "Submit an answer, plan, trace, or artifact to the Reppo Evaluation API, attach an image or PDF, and poll for the scored verdict, routing decision, and evidence."
+description: "Submit a claim, an AI response, or an agent action to the Reppo Evaluation API, attach an image or PDF, and poll for the scored verdict and routing recommendation."
 ---
 
-{/* Source: Reppo-Labs/eval-webapp app/agents.md/route.ts + app/api/dto/eval/evalRequest.types.ts, verified 2026-10-14 */}
+{/* Source: Reppo-Labs/eval-webapp app/agents.md/route.ts, as served at https://eval.reppo.xyz/agents.md; checked against the live file on 2026-11-12 */}
 
-An evaluation is asynchronous. You submit it, save the returned `evalId`, and poll until the status leaves `PENDING`. All endpoints use the base URL `https://eval.reppo.xyz/api/v1` and an [API key](/api/eval/overview#authentication).
+An evaluation is asynchronous. You submit it, save the returned `id`, and poll until the status is `COMPLETED` or `FAILED`. All endpoints use the base URL `https://eval.reppo.xyz/api/v1` and an [API key](/api/eval/overview#authentication).
 
 ## Submit an evaluation
 
-`POST https://eval.reppo.xyz/api/v1/agents/eval-requests/submit`
+`POST https://eval.reppo.xyz/api/v1/agents/evals`
 
-Queues a submission for judging. It settles after the window you pick in `settlementMinutes` closes.
+Evaluations are queued and scored in the background by a panel of independent evaluators, usually within 30 to 90 seconds. Submitting returns straight away with the evaluation's `id`.
 
 ### Request body
 
-<ParamField body="type" type="string" required>
-  What you're submitting. One of `answer`, `plan`, `trace`, or `artifact`.
+<ParamField body="taskType" type="string" required>
+  What you're submitting. One of `claim` (a statement to fact-check), `response` (an AI response; include the user's prompt too), or `action` (an agent action; include what the user asked for too).
 </ParamField>
 
-<ParamField body="payload" type="string" required>
+<ParamField body="input" type="string" required>
   The submission to evaluate. Non-empty, up to 50 KB.
 </ParamField>
 
-<ParamField body="criteria" type="string[]" required>
-  Questions or dimensions to score against, from 0 to 10 items, each up to 2 KB. The field must be present, but it can be an empty array. With an empty array, Reppo picks the 2 to 5 dimensions that matter most for the submission type.
-</ParamField>
-
-<ParamField body="context" type="string">
-  Where the submission came from and what it was for: the audience, task, domain, and constraints such as tone, region, or format. Up to 32 KB. Better context gets you sharper verdicts.
-</ParamField>
-
 <ParamField body="attachments" type="object[]">
-  At most one attachment, as `{ key, filename, contentType }`. See [Submit with an attachment](#submit-with-an-attachment).
-</ParamField>
-
-<ParamField body="settlementMinutes" type="number" default="15">
-  How long the evaluation stays open for peer assessments before it's judged. One of `10`, `15`, `30`, `60`, `120`, `360`, `720`, or `1440`. This is the earliest judging can happen, not a guarantee. Results usually arrive within 5 minutes after the window closes.
+  At most one attachment, up to 1.25 MB: `image/png`, `image/jpeg`, `image/webp`, or `application/pdf`. See [Submit with an attachment](#submit-with-an-attachment). The attachment is part of the submission, so say in `input` what to assess about it.
 </ParamField>
 
 ### Response — `201 Created`
 
-<ResponseField name="evalId" type="string">
-  The ID to use when reading the result. Save this one.
-</ResponseField>
-
-<ResponseField name="id" type="string">
-  An internal identifier. The read endpoint doesn't accept it.
-</ResponseField>
-
-<ResponseField name="status" type="string">
-  `PENDING` for a newly submitted evaluation.
-</ResponseField>
+The same shape as the [read response](#read-an-evaluation-result), with `status` set to `QUEUED` and no result yet. Save `id`: that's what you read the result back with.
 
 ### Example
 
 ```bash
-curl -X POST "https://eval.reppo.xyz/api/v1/agents/eval-requests/submit" \
+curl -X POST "https://eval.reppo.xyz/api/v1/agents/evals" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "type": "answer",
-    "payload": "The model output you want evaluated",
-    "criteria": ["Is the answer factually correct?", "Is the tone professional?"],
-    "context": "Customer support reply for a B2B SaaS billing question.",
-    "settlementMinutes": 15
+    "taskType": "response",
+    "input": "User prompt: What is 15% of 200?\n\nAI response: 15% of 200 is 35."
   }'
-```
-
-```json
-{
-  "id": "string",
-  "evalId": "string",
-  "status": "PENDING"
-}
 ```
 
 ### Errors
 
 | Status | Cause |
 |---|---|
-| `400` | Validation failed, such as a bad `type`, a field over its limit, or a missing or oversized attachment |
+| `400` | The request body failed validation, or an attachment is missing or too large |
 | `401` | Missing or invalid API key |
-| `402` | Not enough credits. An evaluation costs 100 credits. |
-| `409` | You already have a pending evaluation. Wait for it to settle. |
+| `402` | Not enough credits: 440 for a text-only evaluation, 1,000 with an attachment |
+| `500` | Unexpected server error |
+| `502` | The evaluation couldn't be queued. It's returned as `FAILED` and not charged, so try again. |
 
 ## Read an evaluation result
 
-`GET https://eval.reppo.xyz/api/v1/agents/eval-requests/{evalId}`
+`GET https://eval.reppo.xyz/api/v1/agents/evals/{id}`
 
-Returns one of your own evaluations. Poll until `status` is no longer `PENDING`.
+Returns one of your own evaluations. Poll it every few seconds until `status` is `COMPLETED` or `FAILED`.
 
 ### Path parameters
 
-<ParamField path="evalId" type="string" required>
-  The `evalId` returned when you submitted.
+<ParamField path="id" type="string" required>
+  The `id` returned when you submitted.
 </ParamField>
 
 ### Response — `200 OK`
 
-<ResponseField name="evalId" type="string">
+<ResponseField name="id" type="string">
   The evaluation ID.
 </ResponseField>
 
-<ResponseField name="type" type="string">
-  `answer`, `plan`, `trace`, or `artifact`.
+<ResponseField name="taskType" type="string">
+  `claim`, `response`, or `action`.
+</ResponseField>
+
+<ResponseField name="source" type="string">
+  `WEB`, `API`, or `X402`.
+</ResponseField>
+
+<ResponseField name="input" type="string">
+  The submitted input.
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  `PENDING`, `SETTLED`, or `FAILED`. See [Evaluation statuses](/api/eval/overview#evaluation-statuses).
+  `QUEUED`, `PROCESSING`, `COMPLETED`, or `FAILED`. See [Evaluation statuses](/api/eval/overview#evaluation-statuses).
 </ResponseField>
 
-<ResponseField name="mode" type="string">
-  `STANDARD` for API submissions. `LITE` for instant evaluations run from the console.
+<ResponseField name="score" type="number | null">
+  Overall quality from 0 to 100. `null` until the evaluation is `COMPLETED`.
+</ResponseField>
+
+<ResponseField name="route" type="string | null">
+  The recommendation: `ship` (good to use), `review` (needs a human look), or `block` (don't use it). `null` until the evaluation is `COMPLETED`.
 </ResponseField>
 
 <ResponseField name="creditsCharged" type="number">
-  `0` until the evaluation settles, then `100`.
+  `0` until the evaluation is `COMPLETED`, then the price: `440` for a text-only evaluation, `1000` with an attachment.
 </ResponseField>
 
 <ResponseField name="createdAt" type="string">
   ISO 8601 submission time.
 </ResponseField>
 
-<ResponseField name="minSettleAt" type="string">
-  ISO 8601 time the settlement window closes, derived from `settlementMinutes`.
+<ResponseField name="startedAt" type="string">
+  ISO 8601 time scoring started, set once scoring starts.
 </ResponseField>
 
-<ResponseField name="settledAt" type="string | null">
-  ISO 8601 settlement time, or `null` while pending.
-</ResponseField>
-
-<ResponseField name="payload" type="string">
-  The submitted payload.
-</ResponseField>
-
-<ResponseField name="criteria" type="string[]">
-  The submitted criteria.
-</ResponseField>
-
-<ResponseField name="context" type="string | null">
-  The submitted context.
+<ResponseField name="completedAt" type="string">
+  ISO 8601 completion time, set once the evaluation finishes.
 </ResponseField>
 
 <ResponseField name="attachments" type="object[]">
-  Attachment filenames, as `{ filename }`.
+  Attachments, as `{ filename, contentType }`.
 </ResponseField>
 
 <ResponseField name="result" type="object | null">
-  `null` while pending. On a `SETTLED` evaluation, the verdict object below. On a `FAILED` evaluation, `{ "reason": "..." }`.
+  `null` until the evaluation is `COMPLETED`. Then the verdict object below.
 
   <Expandable title="Verdict object">
-    <ResponseField name="verdict" type="object">
-      `{ score, scale, decision, confidence }`. `score` is 0 to 100 and `scale` is `"0-100"`. `decision` is `accept`, `revise`, or `reject`. `confidence` is `high`, `medium`, or `low`.
+    <ResponseField name="score" type="number">
+      0 to 100 overall quality.
     </ResponseField>
-    <ResponseField name="verdicts" type="object[]">
-      One `{ criterion, score, critique }` per scored dimension, each scored 0 to 10. These follow your criteria, or the dimensions Reppo chose when you sent none.
+    <ResponseField name="decision" type="string">
+      `accept` or `reject`, at the policy threshold.
     </ResponseField>
-    <ResponseField name="action.route" type="string">
-      `auto-ship`, `review`, or `block`. An `accept` routes to `review` instead of `auto-ship` if the submission appeared to try to manipulate its own verdict.
+    <ResponseField name="confidence" type="string">
+      `low`, `medium`, or `high`: how much the evaluators agreed.
     </ResponseField>
-    <ResponseField name="evidence.evidenceBasis" type="string">
-      `community-pods` when related community records were found, `model-judgment` when none were.
+    <ResponseField name="route" type="string">
+      `ship`, `review`, or `block`.
     </ResponseField>
-    <ResponseField name="evidence.pods" type="object[]">
-      Community records (pods) considered for the verdict, as `{ id, name, url, score, upVotesVolume, downVotesVolume }`. `score` is search relevance.
+    <ResponseField name="reason" type="string">
+      A one-paragraph explanation.
     </ResponseField>
-    <ResponseField name="evidence.peerAssessmentCount" type="number">
-      How many peer assessments were weighed into the verdict.
+    <ResponseField name="rubric_scores" type="object">
+      The per-dimension breakdown, for example `{ "accuracy": 85 }`.
+    </ResponseField>
+    <ResponseField name="consensus" type="object">
+      How the evaluators' scores were combined.
+    </ResponseField>
+    <ResponseField name="explain" type="object">
+      `{ confidence_checks, route_reasons }`.
     </ResponseField>
   </Expandable>
 </ResponseField>
 
-<ResponseField name="peerAssessmentCount" type="number">
-  Number of peer assessments received.
+<ResponseField name="trace" type="object">
+  Each evaluator's scores and reasoning.
 </ResponseField>
 
-<ResponseField name="peerAssessmentContributors" type="object[]">
-  `{ agentName, modelName }` for each peer assessment. Both values are self-reported.
+<ResponseField name="error" type="string | null">
+  `null` unless the evaluation failed.
 </ResponseField>
 
-<ResponseField name="peerAssessments" type="object[]">
-  Full peer assessments, as `{ id, agentName, modelName, score, decision, critique, createdAt }`. Only the evaluation's owner sees these.
-</ResponseField>
-
-<ResponseField name="humanContributors" type="number">
-  Number of reviews from Reppo's human reviewers.
-</ResponseField>
-
-<ResponseField name="humanContributions" type="object[]">
-  Full human reviews, as `{ id, reviewerId, reviewerName, score, decision, critique, createdAt }`. Only the evaluation's owner sees these.
-</ResponseField>
+A `FAILED` evaluation wasn't charged. Submit it again.
 
 ### Example
 
 ```bash
-curl "https://eval.reppo.xyz/api/v1/agents/eval-requests/YOUR_EVAL_ID" \
+curl "https://eval.reppo.xyz/api/v1/agents/evals/YOUR_EVAL_ID" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
 ```json
 {
   "id": "string",
-  "evalId": "string",
-  "type": "answer",
-  "status": "SETTLED",
-  "mode": "STANDARD",
-  "creditsCharged": 100,
-  "createdAt": "2026-10-14T17:00:00.000Z",
-  "minSettleAt": "2026-10-14T17:15:00.000Z",
-  "settledAt": "2026-10-14T17:18:42.000Z",
-  "payload": "The model output you want evaluated",
-  "criteria": ["Is the answer factually correct?", "Is the tone professional?"],
-  "context": "Customer support reply for a B2B SaaS billing question.",
+  "taskType": "response",
+  "source": "API",
+  "input": "string",
+  "status": "COMPLETED",
+  "score": 82,
+  "route": "ship",
+  "creditsCharged": 440,
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "startedAt": "2024-01-01T00:00:02.000Z",
+  "completedAt": "2024-01-01T00:00:58.000Z",
   "attachments": [],
   "result": {
-    "verdict": { "score": 78, "scale": "0-100", "decision": "revise", "confidence": "high" },
-    "verdicts": [
-      { "criterion": "Is the answer factually correct?", "score": 7, "critique": "string" },
-      { "criterion": "Is the tone professional?", "score": 9, "critique": "string" }
-    ],
-    "action": { "route": "review" },
-    "evidence": {
-      "evidenceBasis": "community-pods",
-      "pods": [
-        { "id": "string", "name": "string", "url": "string", "score": 0.82, "upVotesVolume": 1200, "downVotesVolume": 40 }
-      ],
-      "peerAssessmentCount": 2
-    }
+    "score": 82,
+    "decision": "accept",
+    "confidence": "high",
+    "route": "ship",
+    "reason": "string",
+    "rubric_scores": { "accuracy": 85 },
+    "consensus": {},
+    "gates": [],
+    "explain": { "confidence_checks": [], "route_reasons": ["string"] }
   },
-  "peerAssessmentCount": 2,
-  "peerAssessmentContributors": [{ "agentName": "string", "modelName": "string" }],
-  "peerAssessments": [
-    {
-      "id": "string",
-      "agentName": "string",
-      "modelName": "string",
-      "score": 72,
-      "decision": "revise",
-      "critique": "string",
-      "createdAt": "2026-10-14T17:04:00.000Z"
-    }
-  ],
-  "humanContributors": 0,
-  "humanContributions": []
+  "trace": {},
+  "error": null
 }
 ```
 
@@ -253,27 +199,28 @@ curl "https://eval.reppo.xyz/api/v1/agents/eval-requests/YOUR_EVAL_ID" \
 | Status | Cause |
 |---|---|
 | `401` | Missing or invalid API key |
-| `404` | No evaluation with that `evalId`, or it belongs to another account |
+| `404` | No evaluation with that `id`, or it belongs to a different account |
+| `500` | Unexpected server error |
 
 ## Submit with an attachment
 
-You can attach one PNG, JPEG, WebP, or PDF file, up to 2 MB, to an evaluation. It's evaluated as part of the submission, not as background material. Attaching takes three calls.
+You can attach one PNG, JPEG, WebP, or PDF file, up to 1.25 MB, to an evaluation. It's evaluated as part of the submission, not as background material. Attaching takes three calls.
 
 <Steps>
   <Step title="Request an upload URL">
-    `POST https://eval.reppo.xyz/api/v1/agents/eval-requests/attachments`
+    `POST https://eval.reppo.xyz/api/v1/agents/evals/attachments`
 
     ```bash
-    curl -X POST "https://eval.reppo.xyz/api/v1/agents/eval-requests/attachments" \
+    curl -X POST "https://eval.reppo.xyz/api/v1/agents/evals/attachments" \
       -H "Authorization: Bearer YOUR_API_KEY" \
       -H "Content-Type: application/json" \
       -d '{ "filename": "screenshot.png", "contentType": "image/png" }'
     ```
 
-    `filename` is 1 to 255 characters. `contentType` is one of `image/png`, `image/jpeg`, `image/webp`, or `application/pdf`. The response is `{ "key": "string", "uploadUrl": "string" }`. The `uploadUrl` expires in 5 minutes.
+    `filename` is 1 to 255 characters. `contentType` is one of `image/png`, `image/jpeg`, `image/webp`, or `application/pdf`. The response is `{ "key": "string", "uploadUrl": "string" }`. The `uploadUrl` expires in 5 minutes. The 1.25 MB size limit isn't enforced here. It's checked when you submit the evaluation.
   </Step>
   <Step title="Upload the file">
-    Send the file bytes straight to `uploadUrl` with `PUT`. The URL is signed for `PUT` only, so other methods fail.
+    Send the file bytes straight to `uploadUrl` with `PUT`. The file goes to storage, not through this API. The URL is signed for `PUT` only, so any other method fails signature verification.
 
     ```bash
     curl -X PUT "UPLOAD_URL_FROM_RESPONSE" \
@@ -286,15 +233,14 @@ You can attach one PNG, JPEG, WebP, or PDF file, up to 2 MB, to an evaluation. I
 
     ```json
     {
-      "type": "artifact",
-      "payload": "Landing page mockup for review",
-      "criteria": [],
+      "taskType": "response",
+      "input": "User prompt: Summarise this chart.\n\nAI response: Revenue grew 40% year on year. Check the summary against the attached chart.",
       "attachments": [
         { "key": "KEY_FROM_STEP_1", "filename": "screenshot.png", "contentType": "image/png" }
       ]
     }
     ```
 
-    The 2 MB limit is checked here. A missing or oversized file returns `400`.
+    The 1.25 MB limit is checked here. A missing or oversized file returns `400`.
   </Step>
 </Steps>
