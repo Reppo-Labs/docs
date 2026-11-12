@@ -21,7 +21,7 @@ Use it from the console at [eval.reppo.xyz](https://eval.reppo.xyz), or point yo
 ## How it works
 
 <Steps>
-  <Step title="Send your submission">
+  <Step title="Send your submission with context">
     Submit from the console or the API. Choose the type of submission (`claim`, `response`, or `action`), and include the context the judges need in the text itself: for a response, the user's prompt too; for an action, what the user asked for. You can attach one image or PDF.
   </Step>
   <Step title="A panel of evaluators scores it">
@@ -30,8 +30,8 @@ Use it from the console at [eval.reppo.xyz](https://eval.reppo.xyz), or point yo
   <Step title="Reppo returns one verdict">
     The evaluators' scores are combined into one verdict: a score from 0 to 100, a decision, a confidence level, and a written reason.
   </Step>
-  <Step title="Route on the recommendation">
-    Ship goes ahead, review goes to a person, and block stops it.
+  <Step title="Route on the decision">
+    Ship goes ahead, review goes to a person, block stops it.
   </Step>
 </Steps>
 
@@ -41,7 +41,7 @@ Use it from the console at [eval.reppo.xyz](https://eval.reppo.xyz), or point yo
 |---|---|
 | Score | 0 to 100 overall quality |
 | Decision | `accept` or `reject`, at the policy threshold |
-| Confidence | `high`, `medium`, or `low`: how much the evaluators agreed |
+| Confidence | `high`, `medium`, or `low`: how much the evaluators agreed. Thin or ambiguous submissions still get a verdict, with lower confidence. |
 | Reason | A one-paragraph explanation |
 | Rubric scores | The per-dimension breakdown |
 | Route | `ship`, `review`, or `block` |
@@ -50,15 +50,17 @@ You can use the route directly, or set your own threshold from the score and con
 
 | Route | What to do |
 |---|---|
-| `ship` | Good to use |
-| `review` | Needs a human look |
-| `block` | Don't use it |
+| `ship` | Ship it |
+| `review` | Send it back, or to a person |
+| `block` | Block it and log it |
 
 ## Getting better verdicts
 
 The API takes a `taskType` and an `input`, with no separate context or criteria fields. Put what the judges need to check the work inside `input` itself: for a response, the user's prompt and the answer; for an action, what the user asked for and what the agent did. If you attach an image or PDF, say in `input` what to assess about it.
 
 ## How fast results come back
+
+From the console, you can get a verdict right away.
 
 Evaluations are scored in the background, usually within 30 to 90 seconds. Poll the result until it is `COMPLETED` or `FAILED`.
 
@@ -77,6 +79,8 @@ You're only charged once the evaluation is `COMPLETED`. If an evaluation fails, 
 <Warning>
   Evaluations are public for now: other signed-in users can see submissions on the network feed at [eval.reppo.xyz/evals](https://eval.reppo.xyz/evals). Don't submit confidential material.
 </Warning>
+
+The feed never shows who submitted an evaluation.
 
 ## Evaluate with your agent
 
